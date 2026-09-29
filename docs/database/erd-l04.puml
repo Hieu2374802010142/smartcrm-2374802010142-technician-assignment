@@ -1,0 +1,65 @@
+@startuml
+title ERD - SmartCRM L04
+left to right direction
+
+skinparam backgroundColor white
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #333333
+    FontColor #222222
+}
+skinparam ArrowColor #555555
+
+entity "KHÁCH HÀNG" as KH {
+    * ma_khach_hang : INTEGER <<PK>>
+    --
+    ho_ten : TEXT
+    so_dien_thoai : TEXT
+}
+
+entity "PHIẾU BẢO HÀNH" as PBH {
+    * ma_phieu : INTEGER <<PK>>
+    --
+    ma_khach_hang : INTEGER <<FK>>
+    ten_thiet_bi : TEXT
+    trang_thai : TEXT
+    ngay_tao : DATETIME
+}
+
+entity "KỸ THUẬT VIÊN" as KTV {
+    * ma_ky_thuat_vien : INTEGER <<PK>>
+    --
+    ho_ten : TEXT
+    so_dien_thoai : TEXT
+    chuyen_mon : TEXT
+    dang_hoat_dong : BOOLEAN
+}
+
+entity "PHÂN CÔNG KỸ THUẬT VIÊN" as PC {
+    * ma_phan_cong : INTEGER <<PK>>
+    --
+    ma_phieu : INTEGER <<FK>>
+    ma_ky_thuat_vien : INTEGER <<FK>>
+    ngay_phan_cong : DATETIME
+}
+
+entity "LỊCH HẸN" as LH {
+    * ma_lich_hen : INTEGER <<PK>>
+    --
+    ma_phieu : INTEGER <<FK>>
+    ma_ky_thuat_vien : INTEGER <<FK>>
+    ngay_hen : DATE
+    gio_bat_dau : TIME
+    gio_ket_thuc : TIME
+    loai_lich_hen : TEXT
+    ngay_tao : DATETIME
+}
+
+KH ||--o{ PBH : "có"
+PBH ||--o{ PC : "được phân công"
+KTV ||--o{ PC : "nhận phân công"
+
+PBH ||--o{ LH : "có lịch hẹn"
+KTV ||--o{ LH : "phụ trách"
+
+@enduml

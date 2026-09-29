@@ -1,0 +1,42 @@
+
+@startuml
+title Kiến trúc hệ thống SmartCRM L04
+
+node "Client" {
+    component "Web UI\nHTML/CSS" as UI
+}
+
+node "Backend\nFastAPI" {
+    component "API Layer" as API
+    component "Business Logic" as BL
+    component "Data Access" as DAL
+}
+
+database "SQLite\nsmartcrm.db" as DB
+
+UI --> API : HTTP/JSON
+API --> BL
+BL --> DAL
+DAL --> DB
+
+note right of API
+NFR03:
+Kiểm tra xác thực và quyền
+đối với request phân công
+và đặt lịch
+end note
+
+note right of BL
+NFR04:
+Xử lý lưu dữ liệu theo
+transaction, không tạo
+bản ghi không đầy đủ
+end note
+
+note bottom of UI
+NFR01:
+Danh sách phiếu chưa phân công
+<= 2 giây với tối đa 10.000 phiếu
+end note
+
+@enduml
