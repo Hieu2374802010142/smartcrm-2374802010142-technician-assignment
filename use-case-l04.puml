@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+
+actor "Quản lý trung tâm" as Manager
+actor "Kỹ thuật viên" as Technician
+
+rectangle "Hệ thống Smart CRM\nL04 – Phân công kỹ thuật viên và lịch hẹn" {
+
+    usecase "UC01\nXem phiếu chưa phân công" as UC01
+    usecase "UC02\nXem thông tin\nkỹ thuật viên" as UC02
+    usecase "UC03\nPhân công\nkỹ thuật viên" as UC03
+    usecase "UC04\nĐặt lịch hẹn" as UC04
+    usecase "UC05\nKiểm tra trùng lịch" as UC05
+    usecase "UC06\nXem công việc\nđược phân công" as UC06
+}
+
+Manager --> UC01
+Manager --> UC02
+Manager --> UC03
+Manager --> UC04
+
+Technician --> UC06
+
+UC04 ..> UC05 : <<include>>
+
+@enduml
