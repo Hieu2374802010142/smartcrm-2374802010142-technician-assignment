@@ -76,7 +76,6 @@ Trong toàn bộ tài liệu, các thuật ngữ trên được sử dụng th�
 
 **Kỹ thuật viên** là actor sử dụng hệ thống để xem các công việc đã được phân công.
 
----
 
 # 3. YÊU CẦU CHỨC NĂNG
 
@@ -109,6 +108,18 @@ Nếu thời gian mới bị trùng với lịch hiện có của cùng kỹ thu
 ### FR06 – Kỹ thuật viên xem công việc
 
 Hệ thống phải cho phép Kỹ thuật viên xem danh sách các phiếu bảo hành và lịch hẹn được phân công cho chính mình.
+
+### FR07 – Hủy phân công kỹ thuật viên
+
+Hệ thống phải cho phép Quản lý trung tâm hủy phân công kỹ thuật viên đối với phiếu bảo hành chưa hoàn tất.
+
+Sau khi hủy phân công thành công, kỹ thuật viên được gán cho phiếu phải được xóa và trạng thái phiếu được cập nhật về **Mới** để có thể phân công lại.
+
+### FR08 – Cập nhật lịch hẹn
+
+Hệ thống phải cho phép Quản lý trung tâm cập nhật ngày, thời gian và loại lịch hẹn của một phiếu bảo hành đã có lịch hẹn.
+
+Trước khi lưu thông tin mới, hệ thống phải kiểm tra trùng lịch của kỹ thuật viên.
 
 ---
 
@@ -147,6 +158,18 @@ Hệ thống phải cho phép Kỹ thuật viên xem danh sách các phiếu b�
 ### US06 – Kỹ thuật viên xem công việc
 
 **Là Kỹ thuật viên, tôi muốn xem các phiếu bảo hành và lịch hẹn được phân công cho mình để biết những công việc cần thực hiện.**
+
+**MoSCoW: SHOULD**
+
+### US07 – Hủy phân công kỹ thuật viên
+
+**Là Quản lý trung tâm, tôi muốn hủy phân công kỹ thuật viên đối với phiếu chưa hoàn tất để có thể phân công lại khi cần thiết.**
+
+**MoSCoW: SHOULD**
+
+### US08 – Cập nhật lịch hẹn
+
+**Là Quản lý trung tâm, tôi muốn cập nhật ngày, thời gian và loại lịch hẹn để điều chỉnh lịch giao hoặc nhận máy khi có thay đổi.**
 
 **MoSCoW: SHOULD**
 
@@ -237,6 +260,81 @@ Hệ thống phải cho phép Kỹ thuật viên xem danh sách các phiếu b�
 * **Given:** Kỹ thuật viên chưa được phân công phiếu nào.
 * **When:** Kỹ thuật viên mở danh sách công việc.
 * **Then:** Hệ thống thông báo chưa có công việc được phân công.
+
+### US07 – Hủy phân công kỹ thuật viên
+
+**AC01**
+
+* **Given:** Phiếu bảo hành đã được phân công và chưa hoàn tất.
+* **When:** Quản lý trung tâm chọn chức năng hủy phân công và xác nhận.
+* **Then:** Hệ thống hủy phân công, xóa kỹ thuật viên được gán và chuyển trạng thái phiếu về Mới.
+
+**AC02**
+
+* **Given:** Phiếu bảo hành đã hoàn tất.
+* **When:** Quản lý trung tâm thực hiện hủy phân công.
+* **Then:** Hệ thống không cho phép hủy và thông báo phiếu đã hoàn tất.
+
+### US08 – Cập nhật lịch hẹn
+
+**AC01**
+
+* **Given:** Phiếu bảo hành đã có lịch hẹn.
+* **When:** Quản lý trung tâm thay đổi ngày, thời gian hoặc loại lịch hẹn và xác nhận cập nhật.
+* **Then:** Hệ thống kiểm tra trùng lịch và cập nhật lịch hẹn nếu hợp lệ.
+
+**AC02**
+
+* **Given:** Thời gian mới bị trùng với lịch hiện có của kỹ thuật viên.
+* **When:** Quản lý trung tâm xác nhận cập nhật lịch.
+* **Then:** Hệ thống thông báo trùng lịch và không lưu thông tin mới.
+
+---
+
+# 6. BẢNG TRUY VẾT YÊU CẦU
+
+| Mã FR | Yêu cầu chức năng                                                        | User Story | Use Case                           | MoSCoW | Test Case  |
+| ----- | ------------------------------------------------------------------------ | ---------- | ---------------------------------- | ------ | ---------- |
+| FR01  | Xem danh sách phiếu bảo hành chưa được phân công                         | US01       | UC01 – Xem phiếu chưa phân công    | MUST   | TC01, TC02 |
+| FR02  | Xem thông tin và lịch làm việc của kỹ thuật viên                         | US02       | UC02 – Xem thông tin kỹ thuật viên | MUST   | TC03, TC04 |
+| FR03  | Phân công kỹ thuật viên cho phiếu và cập nhật trạng thái                 | US03       | UC03 – Phân công kỹ thuật viên     | MUST   | TC05, TC06 |
+| FR04  | Tạo lịch hẹn với ngày, thời gian và loại lịch hẹn                        | US04       | UC04 – Đặt lịch hẹn                | MUST   | TC07, TC08 |
+| FR05  | Kiểm tra trùng lịch trước khi lưu lịch hẹn                               | US05       | UC05 – Kiểm tra trùng lịch         | MUST   | TC09, TC10 |
+| FR06  | Cho phép kỹ thuật viên xem các công việc được phân công                  | US06       | UC06 – Xem công việc               | SHOULD | TC11, TC12 |
+| FR07  | Cho phép quản lý hủy phân công kỹ thuật viên đối với phiếu chưa hoàn tất | US07       | UC07 – Hủy phân công kỹ thuật viên | SHOULD | TC13, TC14 |
+| FR08  | Cho phép quản lý cập nhật ngày, thời gian và loại lịch hẹn               | US08       | UC08 – Cập nhật lịch hẹn           | SHOULD | TC15, TC16 |
+
+## 6.1. Kiểm tra truy vết
+
+* FR01 → US01 → UC01 → TC01, TC02
+* FR02 → US02 → UC02 → TC03, TC04
+* FR03 → US03 → UC03 → TC05, TC06
+* FR04 → US04 → UC04 → TC07, TC08
+* FR05 → US05 → UC05 → TC09, TC10
+* FR06 → US06 → UC06 → TC11, TC12
+* FR07 → US07 → UC07 → TC13, TC14
+* FR08 → US08 → UC08 → TC15, TC16
+
+Mỗi yêu cầu chức năng đều có User Story, Use Case và các Test Case tương ứng. Các yêu cầu FR07 và FR08 được bổ sung nhằm đặc tả đầy đủ chức năng **hủy phân công** và **cập nhật lịch hẹn** trong phạm vi L04.
+
+---
+
+# KẾT LUẬN PHẠM VI
+
+SRS này đặc tả luồng **L04 – Phân công kỹ thuật viên và lịch hẹn** trong Smart CRM – Mekong Mobile.
+
+Phạm vi bao gồm 8 Use Case:
+
+1. **UC01 – Xem phiếu chưa phân công**
+2. **UC02 – Xem thông tin kỹ thuật viên**
+3. **UC03 – Phân công kỹ thuật viên**
+4. **UC04 – Đặt lịch hẹn**
+5. **UC05 – Kiểm tra trùng lịch**
+6. **UC06 – Xem công việc**
+7. **UC07 – Hủy phân công kỹ thuật viên**
+8. **UC08 – Cập nhật lịch hẹn**
+
+
 
 ---
 
