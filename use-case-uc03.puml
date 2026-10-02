@@ -1,0 +1,29 @@
+@startuml
+
+title UC03 - Phân công kỹ thuật viên
+
+left to right direction
+
+actor "Quản lý trung tâm" as Manager
+
+rectangle "Hệ thống Smart CRM" {
+
+    usecase "Xem phiếu chưa phân công" as UC01
+    usecase "Xem thông tin kỹ thuật viên" as UC02
+    usecase "Phân công kỹ thuật viên" as UC03
+
+    usecase "Kiểm tra điều kiện phân công" as Check
+    usecase "Lưu phân công" as Save
+    usecase "Cập nhật trạng thái phiếu" as UpdateStatus
+
+}
+
+Manager --> UC03
+
+UC03 ..> UC01 : <<include>>
+UC03 ..> UC02 : <<include>>
+UC03 ..> Check : <<include>>
+UC03 ..> Save : <<include>>
+UC03 ..> UpdateStatus : <<include>>
+
+@enduml
