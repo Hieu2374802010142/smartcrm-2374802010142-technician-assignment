@@ -289,14 +289,16 @@ Kỹ thuật viên chỉ được xem các công việc và lịch hẹn đượ
 
 # 6. BẢNG TRUY VẾT YÊU CẦU
 
-| Mã FR | Yêu cầu chức năng                                        | User Story | Use Case                           | MoSCoW | Test Case  |
-| ----- | -------------------------------------------------------- | ---------- | ---------------------------------- | ------ | ---------- |
-| FR01  | Xem danh sách phiếu bảo hành chưa được phân công         | US01       | UC01 – Xem phiếu chưa phân công    | MUST   | TC01, TC02 |
-| FR02  | Xem thông tin và lịch làm việc của kỹ thuật viên         | US02       | UC02 – Xem thông tin kỹ thuật viên | MUST   | TC03, TC04 |
-| FR03  | Phân công kỹ thuật viên cho phiếu và cập nhật trạng thái | US03       | UC03 – Phân công kỹ thuật viên     | MUST   | TC05, TC06 |
-| FR04  | Tạo lịch hẹn với ngày, thời gian và loại lịch hẹn        | US04       | UC04 – Đặt lịch hẹn                | MUST   | TC07, TC08 |
-| FR05  | Kiểm tra trùng lịch trước khi lưu lịch hẹn               | US05       | UC05 – Kiểm tra trùng lịch         | MUST   | TC09, TC10 |
-| FR06  | Cho phép kỹ thuật viên xem các công việc được phân công  | US06       | UC06 – Xem công việc               | SHOULD | TC11, TC12 |
+| Mã FR | Yêu cầu chức năng                                                        | User Story | Use Case                           | MoSCoW | Test Case  |
+| ----- | ------------------------------------------------------------------------ | ---------- | ---------------------------------- | ------ | ---------- |
+| FR01  | Xem danh sách phiếu bảo hành chưa được phân công                         | US01       | UC01 – Xem phiếu chưa phân công    | MUST   | TC01, TC02 |
+| FR02  | Xem thông tin và lịch làm việc của kỹ thuật viên                         | US02       | UC02 – Xem thông tin kỹ thuật viên | MUST   | TC03, TC04 |
+| FR03  | Phân công kỹ thuật viên cho phiếu và cập nhật trạng thái                 | US03       | UC03 – Phân công kỹ thuật viên     | MUST   | TC05, TC06 |
+| FR04  | Tạo lịch hẹn với ngày, thời gian và loại lịch hẹn                        | US04       | UC04 – Đặt lịch hẹn                | MUST   | TC07, TC08 |
+| FR05  | Kiểm tra trùng lịch trước khi lưu lịch hẹn                               | US05       | UC05 – Kiểm tra trùng lịch         | MUST   | TC09, TC10 |
+| FR06  | Cho phép kỹ thuật viên xem các công việc được phân công                  | US06       | UC06 – Xem công việc               | SHOULD | TC11, TC12 |
+| FR07  | Cho phép quản lý hủy phân công kỹ thuật viên đối với phiếu chưa hoàn tất | US03       | UC07 – Hủy phân công kỹ thuật viên | SHOULD | TC13, TC14 |
+| FR08  | Cho phép quản lý cập nhật ngày, thời gian và loại lịch hẹn               | US04       | UC08 – Cập nhật lịch hẹn           | SHOULD | TC15, TC16 |
 
 ## 6.1. Kiểm tra truy vết
 
