@@ -1,91 +1,42 @@
 
 @startuml
-left to right direction
+title Kiến trúc hệ thống SmartCRM L04
 
-skinparam backgroundColor white
-skinparam shadowing false
-skinparam roundcorner 15
-skinparam defaultFontName Arial
-skinparam defaultFontSize 13
-skinparam componentStyle rectangle
-skinparam packageStyle rectangle
-skinparam linetype ortho
-skinparam ArrowColor #555555
-
-title SMART CRM L04 - SO DO KIEN TRUC HE THONG
-
-package "FRONTEND / WEB UI\nSmartCRM L04" as FE #DCEBFF {
-
-  rectangle "Quan ly trung tam\nXem phieu, phan cong, dat lich" as Manager #FFFFFF
-
-  rectangle "Ky thuat vien\nXem cong viec duoc phan cong" as TechUI #FFFFFF
-
-  rectangle "Danh sach phieu\nUC01 - Xem phieu chua phan cong" as UI01 #FFFFFF
-
-  rectangle "Thong tin ky thuat vien\nUC02 - Xem thong tin va lich lam viec" as UI02 #FFFFFF
-
-  rectangle "Phan cong ky thuat vien\nUC03 - Phan cong\nUC07 - Huy phan cong" as UI03 #FFFFFF
-
-  rectangle "Quan ly lich hen\nUC04 - Dat lich hen\nUC08 - Cap nhat lich hen" as UI04 #FFFFFF
+node "Client" {
+    component "Web UI\nHTML/CSS" as UI
 }
 
-package "BACKEND / FASTAPI\nBusiness Logic Layer" as BE #DDF2DF {
-
-  rectangle "API Layer\nXac thuc, phan quyen\nHTTP Request / Response" as API #FFFFFF
-
-  rectangle "Ticket Service\nUC01 - Xem phieu\nUC06 - Xem cong viec" as Ticket #FFFFFF
-
-  rectangle "Technician Service\nUC02 - Thong tin ky thuat vien" as Technician #FFFFFF
-
-  rectangle "Assignment Service\nUC03 - Phan cong\nUC07 - Huy phan cong" as Assignment #FFFFFF
-
-  rectangle "Appointment Service\nUC04 - Dat lich\nUC08 - Cap nhat lich" as Appointment #FFFFFF
-
-  rectangle "Schedule Check Service\nUC05 - Kiem tra trung lich" as Schedule #FFFFFF
-
-  rectangle "Business Rules & Validation\nKiem tra du lieu va trang thai\nHuy phan cong: dua phieu ve Moi" as Rules #FFF2CC
-
-  rectangle "Data Access Layer\nRepository / SQL" as DAL #FFFFFF
+node "Backend\nFastAPI" {
+    component "API Layer" as API
+    component "Business Logic" as BL
+    component "Data Access" as DAL
 }
 
-package "DATABASE / SQLite\nSmartCRM L04" as DATA #FFE0E0 {
+database "SQLite\nsmartcrm.db" as DB
 
-  database "KHACH HANG\nKhachHang" as KH #FFFFFF
+UI --> API : HTTP/JSON
+API --> BL
+BL --> DAL
+DAL --> DB
 
-  database "PHIEU BAO HANH\nPhieuBaoHanh" as PBH #FFFFFF
+note right of API
+NFR03:
+Kiểm tra xác thực và quyền
+đối với request phân công
+và đặt lịch
+end note
 
-  database "KY THUAT VIEN\nKyThuatVien" as KTV #FFFFFF
+note right of BL
+NFR04:
+Xử lý lưu dữ liệu theo
+transaction, không tạo
+bản ghi không đầy đủ
+end note
 
-  database "PHAN CONG KY THUAT VIEN\nPhanCong" as PC #FFFFFF
-
-  database "LICH HEN\nLichHen" as LH #FFFFFF
-}
-
-FE -[hidden]right-> BE
-BE -[hidden]right-> DATA
-
-Manager --> API : HTTP / JSON
-TechUI --> API : HTTP / JSON
-
-API --> Ticket
-API --> Technician
-API --> Assignment
-API --> Appointment
-
-Appointment --> Schedule : Kiem tra trung lich
-
-Ticket --> Rules
-Technician --> Rules
-Assignment --> Rules
-Appointment --> Rules
-Schedule --> Rules
-
-Rules --> DAL : Truy cap du lieu
-
-DAL --> KH
-DAL --> PBH
-DAL --> KTV
-DAL --> PC
-DAL --> LH
+note bottom of UI
+NFR01:
+Danh sách phiếu chưa phân công
+<= 2 giây với tối đa 10.000 phiếu
+end note
 
 @enduml
