@@ -41,25 +41,24 @@ entity "PHÂN CÔNG KỸ THUẬT VIÊN" as PC {
     ma_phieu : INTEGER <<FK>>
     ma_ky_thuat_vien : INTEGER <<FK>>
     ngay_phan_cong : DATETIME
+    trang_thai_phan_cong : TEXT
 }
 
 entity "LỊCH HẸN" as LH {
     * ma_lich_hen : INTEGER <<PK>>
     --
-    ma_phieu : INTEGER <<FK>>
-    ma_ky_thuat_vien : INTEGER <<FK>>
+    ma_phan_cong : INTEGER <<FK>>
     ngay_hen : DATE
     gio_bat_dau : TIME
     gio_ket_thuc : TIME
     loai_lich_hen : TEXT
+    trang_thai_lich_hen : TEXT
     ngay_tao : DATETIME
 }
 
 KH ||--o{ PBH : "có"
 PBH ||--o{ PC : "được phân công"
 KTV ||--o{ PC : "nhận phân công"
-
-PBH ||--o{ LH : "có lịch hẹn"
-KTV ||--o{ LH : "phụ trách"
+PC ||--o{ LH : "có lịch hẹn"
 
 @enduml

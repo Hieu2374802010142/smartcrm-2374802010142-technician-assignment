@@ -1,3 +1,4 @@
+```plantuml
 @startuml
 left to right direction
 
@@ -12,15 +13,20 @@ rectangle "Hệ thống Smart CRM\nL04 – Phân công kỹ thuật viên và l�
     usecase "UC04\nĐặt lịch hẹn" as UC04
     usecase "UC05\nKiểm tra trùng lịch" as UC05
     usecase "UC06\nXem công việc\nđược phân công" as UC06
+    usecase "UC07\nHủy phân công\nkỹ thuật viên" as UC07
+    usecase "UC08\nCập nhật lịch hẹn" as UC08
 }
 
 Manager --> UC01
 Manager --> UC02
 Manager --> UC03
 Manager --> UC04
+Manager --> UC07
+Manager --> UC08
 
 Technician --> UC06
 
 UC04 ..> UC05 : <<include>>
 
 @enduml
+```

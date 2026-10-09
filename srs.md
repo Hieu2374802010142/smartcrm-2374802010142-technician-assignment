@@ -28,6 +28,10 @@ Luồng L04 bao gồm:
 5. Kiểm tra trùng lịch trước khi lưu lịch hẹn.
 6. Kỹ thuật viên xem các công việc được phân công.
 
+7. Hủy phân công kỹ thuật viên.
+
+8. Cập nhật lịch hẹn.
+
 ## 1.3. Nội dung chủ ý không thực hiện – WON'T
 
 Các nội dung sau **không thuộc phạm vi của L04**:
@@ -291,51 +295,6 @@ Trước khi lưu thông tin mới, hệ thống phải kiểm tra trùng lịch
 
 ---
 
-# 6. BẢNG TRUY VẾT YÊU CẦU
-
-| Mã FR | Yêu cầu chức năng                                                        | User Story | Use Case                           | MoSCoW | Test Case  |
-| ----- | ------------------------------------------------------------------------ | ---------- | ---------------------------------- | ------ | ---------- |
-| FR01  | Xem danh sách phiếu bảo hành chưa được phân công                         | US01       | UC01 – Xem phiếu chưa phân công    | MUST   | TC01, TC02 |
-| FR02  | Xem thông tin và lịch làm việc của kỹ thuật viên                         | US02       | UC02 – Xem thông tin kỹ thuật viên | MUST   | TC03, TC04 |
-| FR03  | Phân công kỹ thuật viên cho phiếu và cập nhật trạng thái                 | US03       | UC03 – Phân công kỹ thuật viên     | MUST   | TC05, TC06 |
-| FR04  | Tạo lịch hẹn với ngày, thời gian và loại lịch hẹn                        | US04       | UC04 – Đặt lịch hẹn                | MUST   | TC07, TC08 |
-| FR05  | Kiểm tra trùng lịch trước khi lưu lịch hẹn                               | US05       | UC05 – Kiểm tra trùng lịch         | MUST   | TC09, TC10 |
-| FR06  | Cho phép kỹ thuật viên xem các công việc được phân công                  | US06       | UC06 – Xem công việc               | SHOULD | TC11, TC12 |
-| FR07  | Cho phép quản lý hủy phân công kỹ thuật viên đối với phiếu chưa hoàn tất | US07       | UC07 – Hủy phân công kỹ thuật viên | SHOULD | TC13, TC14 |
-| FR08  | Cho phép quản lý cập nhật ngày, thời gian và loại lịch hẹn               | US08       | UC08 – Cập nhật lịch hẹn           | SHOULD | TC15, TC16 |
-
-## 6.1. Kiểm tra truy vết
-
-* FR01 → US01 → UC01 → TC01, TC02
-* FR02 → US02 → UC02 → TC03, TC04
-* FR03 → US03 → UC03 → TC05, TC06
-* FR04 → US04 → UC04 → TC07, TC08
-* FR05 → US05 → UC05 → TC09, TC10
-* FR06 → US06 → UC06 → TC11, TC12
-* FR07 → US07 → UC07 → TC13, TC14
-* FR08 → US08 → UC08 → TC15, TC16
-
-Mỗi yêu cầu chức năng đều có User Story, Use Case và các Test Case tương ứng. Các yêu cầu FR07 và FR08 được bổ sung nhằm đặc tả đầy đủ chức năng **hủy phân công** và **cập nhật lịch hẹn** trong phạm vi L04.
-
----
-
-# KẾT LUẬN PHẠM VI
-
-SRS này đặc tả luồng **L04 – Phân công kỹ thuật viên và lịch hẹn** trong Smart CRM – Mekong Mobile.
-
-Phạm vi bao gồm 8 Use Case:
-
-1. **UC01 – Xem phiếu chưa phân công**
-2. **UC02 – Xem thông tin kỹ thuật viên**
-3. **UC03 – Phân công kỹ thuật viên**
-4. **UC04 – Đặt lịch hẹn**
-5. **UC05 – Kiểm tra trùng lịch**
-6. **UC06 – Xem công việc**
-7. **UC07 – Hủy phân công kỹ thuật viên**
-8. **UC08 – Cập nhật lịch hẹn**
-
-
-
 ---
 
 # 4. YÊU CẦU PHI CHỨC NĂNG
@@ -348,6 +307,8 @@ Phạm vi bao gồm 8 Use Case:
 | NFR04 | Tin cậy   | Khi lưu phân công hoặc lịch hẹn, hệ thống phải hoàn tất thao tác theo một giao dịch; trong **100% trường hợp lỗi khi lưu**, không được tạo bản ghi phân công hoặc lịch hẹn không đầy đủ.   |
 
 Các NFR trên được sử dụng làm cơ sở cho việc lựa chọn kiến trúc ở phần thiết kế. Các ngưỡng có thể được điều chỉnh nếu giảng viên yêu cầu theo dữ liệu hoặc môi trường kiểm thử cụ thể.
+
+---
 
 ---
 
@@ -385,6 +346,27 @@ Kỹ thuật viên chỉ được xem các công việc và lịch hẹn đượ
 
 ---
 
+### BR08 – Hủy phân công kỹ thuật viên
+
+Quản lý trung tâm được hủy phân công đối với phiếu chưa hoàn tất.
+
+Khi hủy phân công:
+- Chuyển trạng thái phân công thành Đã hủy.
+- Phiếu không còn kỹ thuật viên đang được gán.
+- Chuyển trạng thái phiếu về Mới.
+- Hủy các lịch hẹn còn hiệu lực liên quan.
+- Lưu các thay đổi trong cùng một transaction.
+
+### BR09 – Cập nhật lịch hẹn
+
+Chỉ Quản lý trung tâm được cập nhật lịch hẹn.
+Hệ thống kiểm tra trùng lịch trước khi lưu.
+Nếu lịch mới bị trùng, hệ thống từ chối cập nhật
+và giữ nguyên dữ liệu cũ.
+
+
+---
+
 # 6. BẢNG TRUY VẾT YÊU CẦU
 
 | Mã FR | Yêu cầu chức năng                                                        | User Story | Use Case                           | MoSCoW | Test Case  |
@@ -395,24 +377,41 @@ Kỹ thuật viên chỉ được xem các công việc và lịch hẹn đượ
 | FR04  | Tạo lịch hẹn với ngày, thời gian và loại lịch hẹn                        | US04       | UC04 – Đặt lịch hẹn                | MUST   | TC07, TC08 |
 | FR05  | Kiểm tra trùng lịch trước khi lưu lịch hẹn                               | US05       | UC05 – Kiểm tra trùng lịch         | MUST   | TC09, TC10 |
 | FR06  | Cho phép kỹ thuật viên xem các công việc được phân công                  | US06       | UC06 – Xem công việc               | SHOULD | TC11, TC12 |
-| FR07  | Cho phép quản lý hủy phân công kỹ thuật viên đối với phiếu chưa hoàn tất | US03       | UC07 – Hủy phân công kỹ thuật viên | SHOULD | TC13, TC14 |
-| FR08  | Cho phép quản lý cập nhật ngày, thời gian và loại lịch hẹn               | US04       | UC08 – Cập nhật lịch hẹn           | SHOULD | TC15, TC16 |
+| FR07  | Cho phép quản lý hủy phân công kỹ thuật viên đối với phiếu chưa hoàn tất | US07       | UC07 – Hủy phân công kỹ thuật viên | SHOULD | TC13, TC14 |
+| FR08  | Cho phép quản lý cập nhật ngày, thời gian và loại lịch hẹn               | US08       | UC08 – Cập nhật lịch hẹn           | SHOULD | TC15, TC16 |
 
 ## 6.1. Kiểm tra truy vết
 
-* FR01 → US01 → UC01
-* FR02 → US02 → UC02
-* FR03 → US03 → UC03
-* FR04 → US04 → UC04
-* FR05 → US05 → UC05
-* FR06 → US06 → UC06
+* FR01 → US01 → UC01 → TC01, TC02
+* FR02 → US02 → UC02 → TC03, TC04
+* FR03 → US03 → UC03 → TC05, TC06
+* FR04 → US04 → UC04 → TC07, TC08
+* FR05 → US05 → UC05 → TC09, TC10
+* FR06 → US06 → UC06 → TC11, TC12
+* FR07 → US07 → UC07 → TC13, TC14
+* FR08 → US08 → UC08 → TC15, TC16
 
-Mỗi yêu cầu chức năng đều có ít nhất một User Story và một Use Case tương ứng. Các mã Test Case được xác định trước để tiếp tục sử dụng khi thực hiện phần kiểm thử ở Bài tập 3.
+Mỗi yêu cầu chức năng đều có User Story, Use Case và các Test Case tương ứng. Các yêu cầu FR07 và FR08 được bổ sung nhằm đặc tả đầy đủ chức năng **hủy phân công** và **cập nhật lịch hẹn** trong phạm vi L04.
 
 ---
 
-## KẾT LUẬN PHẠM VI
+---
 
-SRS này đặc tả luồng **L04 – Phân công kỹ thuật viên và lịch hẹn** trong Smart CRM – Mekong Mobile. Phạm vi tập trung vào việc Quản lý trung tâm xử lý các phiếu chưa phân công, xem thông tin kỹ thuật viên, phân công kỹ thuật viên, đặt lịch hẹn và kiểm tra trùng lịch; đồng thời cho phép Kỹ thuật viên xem các công việc được giao.
+# KẾT LUẬN PHẠM VI
 
-Các yêu cầu chức năng, User Story, quy tắc nghiệp vụ và Use Case được liên kết thông qua bảng truy vết để bảo đảm tính nhất quán giữa các phần của Bài tập 1.
+SRS này đặc tả luồng **L04 – Phân công kỹ thuật viên và lịch hẹn** trong Smart CRM – Mekong Mobile.
+
+Phạm vi bao gồm 8 Use Case:
+
+1. **UC01 – Xem phiếu chưa phân công**
+2. **UC02 – Xem thông tin kỹ thuật viên**
+3. **UC03 – Phân công kỹ thuật viên**
+4. **UC04 – Đặt lịch hẹn**
+5. **UC05 – Kiểm tra trùng lịch**
+6. **UC06 – Xem công việc**
+7. **UC07 – Hủy phân công kỹ thuật viên**
+8. **UC08 – Cập nhật lịch hẹn**
+
+
+
+---
