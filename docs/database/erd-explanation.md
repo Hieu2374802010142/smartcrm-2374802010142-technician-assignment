@@ -1,7 +1,7 @@
 # GIẢI THÍCH ERD VÀ CHUẨN HÓA 3NF – SMARTCRM L04
 
-**Dự án:** SmartCRM – Mekong Mobile  
-**Track:** SE – Software Engineering  
+**Dự án:** SmartCRM – Mekong Mobile
+**Track:** SE – Software Engineering
 **Luồng:** L04 – Phân công kỹ thuật viên và lịch hẹn
 
 ## 1. Mục đích thiết kế cơ sở dữ liệu
