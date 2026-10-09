@@ -32,7 +32,7 @@ entity "KỸ THUẬT VIÊN" as KTV {
     ho_ten : TEXT
     so_dien_thoai : TEXT
     chuyen_mon : TEXT
-    dang_hoat_dong : BOOLEAN
+    dang_hoat_dong : INTEGER
 }
 
 entity "PHÂN CÔNG KỸ THUẬT VIÊN" as PC {
