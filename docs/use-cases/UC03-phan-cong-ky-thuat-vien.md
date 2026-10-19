@@ -48,11 +48,13 @@ Cho phép quản lý trung tâm chọn và phân công một kỹ thuật viên 
 
 **7a. Lỗi khi lưu thông tin phân công**
 
-* Hệ thống thông báo lỗi lưu dữ liệu.
-* Thông tin phân công không được lưu không đầy đủ.
-* Trạng thái phiếu vẫn giữ nguyên là **Mới**.
-* Quản lý có thể thực hiện lại thao tác phân công.
+- Khi xảy ra lỗi trong quá trình lưu phân công hoặc cập nhật trạng thái phiếu, hệ thống hủy toàn bộ giao dịch (rollback).
+- Không tạo bản ghi phân công không đầy đủ.
+- Trạng thái phiếu bảo hành vẫn giữ nguyên là **Mới**.
+- Hệ thống thông báo: **"Phân công thất bại. Vui lòng thử lại."**
+- Quản lý trung tâm có thể thực hiện lại thao tác phân công.
 
+**Giải thích:** Việc lưu thông tin phân công và cập nhật trạng thái phiếu phải được thực hiện trong cùng một transaction nhằm đáp ứng NFR04 – Tính tin cậy.
 ### QUY TẮC NGHIỆP VỤ LIÊN QUAN
 
 * **BR01:** Chỉ phiếu ở trạng thái **Mới** và chưa được phân công mới được phân công.
