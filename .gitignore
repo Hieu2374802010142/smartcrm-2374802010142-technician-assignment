@@ -24,3 +24,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Local backup files
+*-backup.md
+*-backup.sql
