@@ -7,9 +7,11 @@
 
 ## 1. Giới thiệu dự án
 
-SmartCRM L04 hỗ trợ Quản lý trung tâm xem phiếu bảo hành chưa phân công, lựa chọn kỹ thuật viên, thực hiện phân công và quản lý lịch hẹn giao – nhận thiết bị.
+SmartCRM L04 là hệ thống hỗ trợ quản lý quy trình phân công kỹ thuật viên và lịch hẹn trong trung tâm bảo hành thiết bị.
 
-Hệ thống kiểm tra trùng lịch trước khi lưu lịch hẹn. Kỹ thuật viên có thể xem công việc được phân công cho mình.
+Hệ thống được thiết kế để hỗ trợ Quản lý trung tâm xem phiếu bảo hành chưa phân công, lựa chọn kỹ thuật viên phù hợp, thực hiện phân công và quản lý lịch hẹn giao – nhận thiết bị.
+
+Trong **Sprint 1 – Buổi 8**, dự án tập trung xây dựng cơ sở dữ liệu, tổ chức kiến trúc Backend và triển khai CRUD cho thực thể Kỹ thuật viên.
 
 ## 2. Môi trường và hướng dẫn chạy
 
@@ -24,15 +26,35 @@ Hệ thống kiểm tra trùng lịch trước khi lưu lịch hẹn. Kỹ thu�
 
 ### 2.2. Cài đặt thư viện
 
-Tại thư mục gốc của dự án, chạy:
+Tại thư mục gốc dự án, chạy:
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-Đảm bảo môi trường đã cài đặt FastAPI và Uvicorn.
+### 2.3. Khởi tạo cơ sở dữ liệu
 
-### 2.3. Khởi động Backend
+File SQL DDL:
+
+`docs/database/schema-l04.sql`
+
+Chạy lệnh sau để tạo database và thêm dữ liệu mẫu:
+
+```bash
+python3 -m src.backend.seed
+```
+
+Chương trình sẽ:
+
+- Tạo database `smartcrm-sprint1.db` nếu chưa tồn tại.
+- Khởi tạo 5 bảng theo ERD L04.
+- Thêm 3 kỹ thuật viên mẫu nếu bảng kỹ thuật viên chưa có dữ liệu.
+- Không thêm dữ liệu mẫu trùng khi chạy lại.
+- Không ghi đè dữ liệu kỹ thuật viên hiện có.
+
+Database SQLite được lưu tại thư mục gốc dự án và không đưa lên GitHub.
+
+### 2.4. Khởi động Backend
 
 ```bash
 python3 -m uvicorn src.backend.main:app --reload
@@ -40,31 +62,17 @@ python3 -m uvicorn src.backend.main:app --reload
 
 Địa chỉ Backend:
 
-`http://127.0.0.1:8000`
+http://127.0.0.1:8000
 
 Swagger UI:
 
-`http://127.0.0.1:8000/docs`
+http://127.0.0.1:8000/docs
 
-### 2.4. Cơ sở dữ liệu
+Truy cập Swagger UI để kiểm thử các API.
 
-File thiết kế SQL:
+## 3. Phạm vi chức năng L04
 
-`docs/database/schema-l04.sql`
-
-Tạo database Sprint 1 nếu chưa tồn tại:
-
-```bash
-sqlite3 smartcrm-sprint1.db < docs/database/schema-l04.sql
-```
-
-Backend sử dụng file `smartcrm-sprint1.db` tại thư mục gốc dự án.
-
-Lưu ý: Không chạy lại lệnh tạo bảng trên một database đã có dữ liệu nếu chưa kiểm tra hoặc sao lưu.
-
-## 3. Phạm vi chức năng
-
-Các chức năng nghiệp vụ L04:
+Các Use Case thuộc phạm vi thiết kế:
 
 - UC01 – Xem phiếu chưa phân công
 - UC02 – Xem thông tin kỹ thuật viên
@@ -75,9 +83,11 @@ Các chức năng nghiệp vụ L04:
 - UC07 – Hủy phân công kỹ thuật viên
 - UC08 – Cập nhật lịch hẹn
 
-Các chức năng trên là phạm vi thiết kế, không đồng nghĩa tất cả đã được lập trình.
+Các Use Case trên thuộc phạm vi thiết kế tổng thể. Trong Sprint 1, hệ thống mới triển khai CRUD kỹ thuật viên để làm nền tảng cho các chức năng nghiệp vụ tiếp theo.
 
-## 4. Thiết kế hệ thống
+## 4. Thiết kế và kiến trúc hệ thống
+
+### 4.1. Tài liệu thiết kế
 
 - SRS: `srs.md`
 - Use Case: `docs/use-cases/`
@@ -85,6 +95,43 @@ Các chức năng trên là phạm vi thiết kế, không đồng nghĩa tất 
 - ERD và SQL DDL: `docs/database/`
 - Wireframe: `docs/wireframes/`
 - Nhật ký thay đổi thiết kế: `docs/thay-doi-thiet-ke.md`
+
+### 4.2. Kiến trúc Backend
+
+Backend được tổ chức theo ba tầng:
+
+**Routes → Service → Repository → SQLite**
+
+- **Routes:** Tiếp nhận HTTP request và trả về response.
+- **Service:** Xử lý logic nghiệp vụ và các trường hợp lỗi.
+- **Repository:** Thực hiện truy vấn SQLite.
+- **SQLite:** Lưu trữ dữ liệu của hệ thống.
+
+Các file chính:
+
+```text
+src/backend/
+├── main.py
+├── seed.py
+├── routes/
+│   └── technician_routes.py
+├── services/
+│   └── technician_service.py
+└── repositories/
+    └── technician_repository.py
+```
+
+### 4.3. Cơ sở dữ liệu
+
+Database gồm 5 bảng:
+
+1. `khach_hang`
+2. `phieu_bao_hanh`
+3. `ky_thuat_vien`
+4. `phan_cong_ky_thuat_vien`
+5. `lich_hen`
+
+Các bảng được xây dựng dựa trên ERD của luồng L04.
 
 ## 5. API Sprint 1
 
@@ -97,28 +144,50 @@ Các chức năng trên là phạm vi thiết kế, không đồng nghĩa tất 
 | PUT | `/api/technicians/{technician_id}` | Cập nhật kỹ thuật viên |
 | DELETE | `/api/technicians/{technician_id}` | Ngừng hoạt động kỹ thuật viên (xóa mềm) |
 
+### Kiểm thử API
+
+Đã kiểm thử bằng Swagger UI:
+
+- GET danh sách kỹ thuật viên: HTTP 200.
+- POST thêm kỹ thuật viên: HTTP 201.
+- PUT cập nhật kỹ thuật viên: HTTP 200.
+- DELETE ngừng hoạt động kỹ thuật viên: HTTP 200.
+
+Ảnh minh chứng được lưu tại:
+
+`docs/api-tests/`
+
+Gồm các file:
+
+- `get-technicians.png`
+- `post-technician.png`
+- `put-technician.png`
+- `delete-technician.png`
+
 ## 6. Tiến độ Sprint 1 – Buổi 8
 
-### Đã thực hiện
+### 6.1. Đã hoàn thành
 
-- Rà soát phản hồi BT1.
+- Rà soát phản hồi Bài tập 1.
 - Tạo nhật ký thay đổi thiết kế.
-- Tạo cơ sở dữ liệu Sprint 1 theo SQL DDL.
-- Tạo 5 bảng theo ERD L04.
-- Thêm dữ liệu mẫu kỹ thuật viên.
-- Khởi động Backend FastAPI thành công.
-- Kiểm thử API GET danh sách kỹ thuật viên.
-- Kiểm thử POST thêm kỹ thuật viên: HTTP 201.
-- Kiểm thử PUT cập nhật kỹ thuật viên: HTTP 200.
-- Kiểm tra xóa mềm qua dữ liệu GET.
+- Xây dựng SQL DDL gồm 5 bảng.
+- Tổ chức Backend theo kiến trúc Routes → Service → Repository.
+- Xây dựng CRUD kỹ thuật viên bằng FastAPI và SQLite.
+- Kiểm thử các API GET, POST, PUT, DELETE.
+- Lưu 4 ảnh minh chứng kiểm thử Swagger.
+- Xây dựng chương trình tạo dữ liệu mẫu `seed.py`.
+- Kiểm tra tạo thành công 5 bảng trên database mới.
+- Kiểm tra thêm thành công 3 kỹ thuật viên mẫu.
+- Sử dụng Conventional Commits.
+- Commit và push mã nguồn lên GitHub nhánh `main`.
 
-### Cần tiếp tục
+### 6.2. Công việc cần tiếp tục
 
-- Lưu ảnh minh chứng kiểm thử API vào thư mục `docs/`.
-- Hoàn thiện tổ chức Backend theo các lớp kiến trúc.
-- Bổ sung kiểm thử tự động và xử lý ngoại lệ.
-- Xây dựng chức năng phân công kỹ thuật viên và đặt lịch hẹn.
-- Kiểm tra tính nhất quán giữa mã nguồn và tài liệu thiết kế.
+- Bổ sung kiểm thử tự động và các trường hợp ngoại lệ.
+- Xây dựng chức năng phân công kỹ thuật viên.
+- Xây dựng chức năng đặt lịch hẹn.
+- Triển khai kiểm tra trùng lịch trước khi lưu.
+- Tiếp tục đối chiếu mã nguồn với tài liệu thiết kế.
 
 ## 7. GitHub
 
@@ -126,4 +195,6 @@ Repository:
 
 https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment
 
-Nhánh phát triển hiện tại: `main`.
+Nhánh phát triển: `main`.
+
+Dự án sử dụng GitHub để quản lý mã nguồn, tài liệu thiết kế và minh chứng kiểm thử trong quá trình thực hiện Sprint 1.
