@@ -1,0 +1,508 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCRM L04</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f6fa;
+        }
+
+        h1 {
+            color: #234b8a;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #e8eef8;
+        }
+
+        button, select, input {
+            padding: 8px 12px;
+            margin-top: 8px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        select {
+            min-width: 250px;
+        }
+
+        #message, #assignMessage, #appointmentMessage {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MAN HINH 1: DANH SACH PHIEU -->
+    <div class="container">
+        <h1>SmartCRM L04</h1>
+        <h2>Danh sách phiếu chưa phân công</h2>
+
+        <button onclick="loadTickets()">Tải danh sách</button>
+
+        <p id="message">Đang tải dữ liệu...</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã phiếu</th>
+                    <th>Thiết bị</th>
+                    <th>Khách hàng</th>
+                    <th>Số điện thoại</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody id="ticketTable"></tbody>
+        </table>
+    </div>
+
+    <!-- MAN HINH 2: PHAN CONG KY THUAT VIEN -->
+    <div class="container">
+        <h2>Phân công kỹ thuật viên</h2>
+
+        <label for="ticketSelect">Chọn phiếu bảo hành:</label>
+        <br>
+        <select id="ticketSelect">
+            <option value="">Đang tải phiếu...</option>
+        </select>
+
+        <br><br>
+
+        <label for="technicianSelect">Chọn kỹ thuật viên:</label>
+        <br>
+        <select id="technicianSelect">
+            <option value="">Đang tải kỹ thuật viên...</option>
+        </select>
+
+        <br><br>
+
+        <button id="assignButton" onclick="assignTechnician()">
+            Phân công
+        </button>
+
+        <p id="assignMessage"></p>
+    </div>
+
+    <!-- MAN HINH 3: DAT LICH HEN -->
+    <div class="container">
+        <h2>Đặt lịch hẹn</h2>
+
+        <label for="assignmentSelect">Chọn phân công:</label>
+        <br>
+        <select id="assignmentSelect">
+            <option value="">Đang tải phân công...</option>
+        </select>
+
+        <br><br>
+
+        <label for="appointmentDate">Ngày hẹn:</label>
+        <br>
+        <input type="date" id="appointmentDate">
+
+        <br><br>
+
+        <label for="startTime">Giờ bắt đầu:</label>
+        <br>
+        <input type="time" id="startTime">
+
+        <br><br>
+
+        <label for="endTime">Giờ kết thúc:</label>
+        <br>
+        <input type="time" id="endTime">
+
+        <br><br>
+
+        <label for="appointmentType">Loại lịch hẹn:</label>
+        <br>
+        <select id="appointmentType">
+            <option value="">-- Chọn loại lịch --</option>
+            <option value="Nhan thiet bi">Nhận thiết bị</option>
+            <option value="Tra thiet bi">Trả thiết bị</option>
+        </select>
+
+        <br><br>
+
+        <button id="appointmentButton" onclick="createAppointment()">
+            Lưu lịch hẹn
+        </button>
+
+        <p id="appointmentMessage"></p>
+    </div>
+
+    <script>
+        // HAM HO TRO KIEM TRA LOI API
+        async function checkResponse(response) {
+            if (response.ok) {
+                return response.json();
+            }
+
+            if (response.status === 401) {
+                throw new Error(
+                    "Chưa đăng nhập hoặc phiên đã hết hạn"
+                );
+            }
+
+            const data = await response.json().catch(() => ({}));
+
+            throw new Error(
+                data.detail || "Có lỗi xảy ra khi kết nối API"
+            );
+        }
+
+        // MAN HINH 1: TAI DANH SACH PHIEU
+        async function loadTickets() {
+            const message = document.getElementById("message");
+            const table = document.getElementById("ticketTable");
+
+            message.textContent = "Đang tải dữ liệu...";
+            table.innerHTML = "";
+
+            try {
+                const response = await fetch(
+                    "/api/tickets/unassigned"
+                );
+
+                const data = await checkResponse(response);
+
+                if (data.tickets.length === 0) {
+                    message.textContent =
+                        "Không có phiếu chưa phân công.";
+                    return;
+                }
+
+                message.textContent =
+                    "Tổng số phiếu: " + data.total;
+
+                data.tickets.forEach(ticket => {
+                    const row = document.createElement("tr");
+
+                    [
+                        ticket.ma_phieu,
+                        ticket.ten_thiet_bi,
+                        ticket.ten_khach_hang,
+                        ticket.so_dien_thoai,
+                        ticket.trang_thai
+                    ].forEach(value => {
+                        const cell = document.createElement("td");
+                        cell.textContent = value ?? "";
+                        row.appendChild(cell);
+                    });
+
+                    table.appendChild(row);
+                });
+
+            } catch (error) {
+                message.textContent =
+                    "Lỗi: " + error.message;
+            }
+        }
+
+        // MAN HINH 2: TAI DANH SACH PHIEU VA KY THUAT VIEN
+        async function loadAssignmentOptions() {
+            const ticketSelect =
+                document.getElementById("ticketSelect");
+
+            const technicianSelect =
+                document.getElementById("technicianSelect");
+
+            const message =
+                document.getElementById("assignMessage");
+
+            ticketSelect.innerHTML =
+                '<option value="">Đang tải phiếu...</option>';
+
+            technicianSelect.innerHTML =
+                '<option value="">Đang tải kỹ thuật viên...</option>';
+
+            try {
+                const [ticketResponse, technicianResponse] =
+                    await Promise.all([
+                        fetch("/api/tickets/unassigned"),
+                        fetch("/api/technicians")
+                    ]);
+
+                const ticketData =
+                    await checkResponse(ticketResponse);
+
+                const technicianData =
+                    await checkResponse(technicianResponse);
+
+                ticketSelect.innerHTML =
+                    '<option value="">-- Chọn phiếu --</option>';
+
+                technicianSelect.innerHTML =
+                    '<option value="">-- Chọn kỹ thuật viên --</option>';
+
+                ticketData.tickets.forEach(ticket => {
+                    const option = document.createElement("option");
+
+                    option.value = ticket.ma_phieu;
+                    option.textContent =
+                        "Phiếu " + ticket.ma_phieu +
+                        " - " + ticket.ten_thiet_bi;
+
+                    ticketSelect.appendChild(option);
+                });
+
+                const activeTechnicians =
+                    technicianData.technicians.filter(
+                        technician =>
+                            technician.dang_hoat_dong === 1
+                    );
+
+                activeTechnicians.forEach(technician => {
+                    const option = document.createElement("option");
+
+                    option.value =
+                        technician.ma_ky_thuat_vien;
+
+                    option.textContent =
+                        technician.ho_ten +
+                        " - " + technician.chuyen_mon;
+
+                    technicianSelect.appendChild(option);
+                });
+
+                if (ticketData.tickets.length === 0) {
+                    message.textContent =
+                        "Không có phiếu cần phân công.";
+                } else {
+                    message.textContent = "";
+                }
+
+            } catch (error) {
+                ticketSelect.innerHTML =
+                    '<option value="">Không tải được phiếu</option>';
+
+                technicianSelect.innerHTML =
+                    '<option value="">Không tải được kỹ thuật viên</option>';
+
+                message.textContent =
+                    "Lỗi: " + error.message;
+            }
+        }
+
+        // MAN HINH 2: THUC HIEN PHAN CONG
+        async function assignTechnician() {
+            const ticketId =
+                document.getElementById("ticketSelect").value;
+
+            const technicianId =
+                document.getElementById("technicianSelect").value;
+
+            const message =
+                document.getElementById("assignMessage");
+
+            const button =
+                document.getElementById("assignButton");
+
+            if (!ticketId || !technicianId) {
+                message.textContent =
+                    "Vui lòng chọn phiếu và kỹ thuật viên.";
+                return;
+            }
+
+            message.textContent = "Đang phân công...";
+            button.disabled = true;
+
+            try {
+                const response = await fetch(
+                    "/api/tickets/" + ticketId + "/assign",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            ma_ky_thuat_vien:
+                                Number(technicianId)
+                        })
+                    }
+                );
+
+                const data = await checkResponse(response);
+
+                const successMessage =
+                    "Phân công thành công! Mã phân công: " +
+                    data.ma_phan_cong;
+
+                await loadTickets();
+                await loadAssignmentOptions();
+                await loadAssignments();
+
+                message.textContent = successMessage;
+
+            } catch (error) {
+                message.textContent =
+                    "Lỗi: " + error.message;
+
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        // MAN HINH 3: TAI DANH SACH PHAN CONG
+        async function loadAssignments() {
+            const select =
+                document.getElementById("assignmentSelect");
+
+            const message =
+                document.getElementById("appointmentMessage");
+
+            select.innerHTML =
+                '<option value="">Đang tải phân công...</option>';
+
+            try {
+                const response = await fetch(
+                    "/api/tickets/assignments"
+                );
+
+                const data = await checkResponse(response);
+
+                select.innerHTML =
+                    '<option value="">-- Chọn phân công --</option>';
+
+                data.assignments.forEach(assignment => {
+                    const option = document.createElement("option");
+
+                    option.value = assignment.ma_phan_cong;
+
+                    option.textContent =
+                        "Phân công " + assignment.ma_phan_cong +
+                        " - " + assignment.ten_thiet_bi +
+                        " - " + assignment.ten_ky_thuat_vien;
+
+                    select.appendChild(option);
+                });
+
+                if (data.assignments.length === 0) {
+                    message.textContent =
+                        "Chưa có phân công để đặt lịch.";
+                } else {
+                    message.textContent = "";
+                }
+
+            } catch (error) {
+                select.innerHTML =
+                    '<option value="">Không tải được phân công</option>';
+
+                message.textContent =
+                    "Lỗi: " + error.message;
+            }
+        }
+
+        // MAN HINH 3: LUU LICH HEN
+        async function createAppointment() {
+            const assignmentId =
+                document.getElementById("assignmentSelect").value;
+
+            const date =
+                document.getElementById("appointmentDate").value;
+
+            const start =
+                document.getElementById("startTime").value;
+
+            const end =
+                document.getElementById("endTime").value;
+
+            const type =
+                document.getElementById("appointmentType").value;
+
+            const message =
+                document.getElementById("appointmentMessage");
+
+            const button =
+                document.getElementById("appointmentButton");
+
+            if (!assignmentId || !date || !start || !end || !type) {
+                message.textContent =
+                    "Vui lòng nhập đầy đủ thông tin.";
+                return;
+            }
+
+            if (end <= start) {
+                message.textContent =
+                    "Giờ kết thúc phải sau giờ bắt đầu.";
+                return;
+            }
+
+            message.textContent = "Đang lưu lịch hẹn...";
+            button.disabled = true;
+
+            try {
+                const response = await fetch(
+                    "/api/tickets/appointments",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            ma_phan_cong:
+                                Number(assignmentId),
+                            ngay_hen: date,
+                            gio_bat_dau: start,
+                            gio_ket_thuc: end,
+                            loai_lich_hen: type
+                        })
+                    }
+                );
+
+                if (response.status === 409) {
+                    throw new Error(
+                        "Lịch hẹn bị trùng với lịch của kỹ thuật viên."
+                    );
+                }
+
+                const data = await checkResponse(response);
+
+                message.textContent =
+                    "Đặt lịch thành công! Mã lịch hẹn: " +
+                    data.ma_lich_hen;
+
+            } catch (error) {
+                message.textContent =
+                    "Lỗi: " + error.message;
+
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        // TAI DU LIEU KHI MO TRANG
+        loadTickets();
+        loadAssignmentOptions();
+        loadAssignments();
+    </script>
+
+</body>
+</html>
