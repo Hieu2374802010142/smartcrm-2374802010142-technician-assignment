@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from src.backend.repositories.technician_repository import get_db_connection
 from src.backend.routes.technician_routes import router as technician_router
 from src.backend.routes.ticket_routes import router as ticket_router
-
+from src.backend.routes.auth_routes import router as auth_router
 
 app = FastAPI(title="SmartCRM - L04")
 
@@ -15,7 +15,8 @@ app.include_router(technician_router)
 # Dang ky Routes phieu bao hanh
 app.include_router(ticket_router)
 
-
+# Dang ky API dang nhap
+app.include_router(auth_router)
 # API trang chu
 @app.get("/")
 def hello():

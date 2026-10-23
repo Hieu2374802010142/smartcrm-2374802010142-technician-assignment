@@ -1,8 +1,11 @@
-from fastapi import APIRouter
+
+from fastapi import APIRouter, Depends
 from datetime import date, time
 from pydantic import BaseModel, Field
 
 from src.backend.services import ticket_service
+from src.backend.auth.security import get_current_user, require_manager
+
 
 router = APIRouter(
     prefix="/api/tickets",
@@ -10,10 +13,16 @@ router = APIRouter(
 )
 
 
+# Kiem tra dang nhap va quyen Quan ly trung tam
+def check_manager(user: dict = Depends(get_current_user)):
+    return require_manager(user)
+
+
 # UC01 - Xem danh sach phieu chua phan cong
 @router.get("/unassigned")
 def get_unassigned_tickets():
     return ticket_service.get_unassigned_tickets()
+
 
 # Du lieu dau vao khi phan cong ky thuat vien
 class TechnicianAssignment(BaseModel):
@@ -24,12 +33,14 @@ class TechnicianAssignment(BaseModel):
 @router.post("/{ticket_id}/assign")
 def assign_technician(
     ticket_id: int,
-    data: TechnicianAssignment
+    data: TechnicianAssignment,
+    manager: dict = Depends(check_manager)
 ):
     return ticket_service.assign_technician(
         ticket_id,
         data.ma_ky_thuat_vien
     )
+
 
 # Du lieu dau vao khi dat lich hen
 class AppointmentCreate(BaseModel):
@@ -42,7 +53,10 @@ class AppointmentCreate(BaseModel):
 
 # UC04 - Dat lich hen va UC05 - Kiem tra trung lich
 @router.post("/appointments")
-def create_appointment(data: AppointmentCreate):
+def create_appointment(
+    data: AppointmentCreate,
+    manager: dict = Depends(check_manager)
+):
     return ticket_service.create_appointment(
         data.ma_phan_cong,
         data.ngay_hen.isoformat(),
@@ -50,6 +64,7 @@ def create_appointment(data: AppointmentCreate):
         data.gio_ket_thuc.isoformat(),
         data.loai_lich_hen
     )
+
 
 # Lay danh sach phan cong dang hoat dong
 @router.get("/assignments")
