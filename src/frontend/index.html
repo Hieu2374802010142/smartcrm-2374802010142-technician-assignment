@@ -49,22 +49,78 @@
             cursor: pointer;
         }
 
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
         select {
             min-width: 250px;
         }
 
-        #message, #assignMessage, #appointmentMessage {
+        #message,
+        #assignMessage,
+        #appointmentMessage,
+        #loginMessage {
             margin-top: 15px;
+        }
+
+        #loginMessage {
+            color: #234b8a;
+        }
+
+        [hidden] {
+            display: none !important;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- MAN HINH 1: DANH SACH PHIEU -->
+    <!-- DANG NHAP QUAN LY -->
     <div class="container">
         <h1>SmartCRM L04</h1>
-        <h2>Danh sách phiếu chưa phân công</h2>
+        <h2>Đăng nhập quản lý</h2>
+
+        <form id="loginForm">
+            <label for="loginUsername">Tên đăng nhập:</label>
+            <br>
+            <input
+                type="text"
+                id="loginUsername"
+                value="manager"
+                autocomplete="username"
+                required
+            >
+
+            <br><br>
+
+            <label for="loginPassword">Mật khẩu:</label>
+            <br>
+            <input
+                type="password"
+                id="loginPassword"
+                autocomplete="current-password"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit" id="loginButton">
+                Đăng nhập
+            </button>
+        </form>
+
+        <button id="logoutButton" onclick="logoutManager()" hidden>
+            Đăng xuất
+        </button>
+
+        <p id="loginMessage">Bạn chưa đăng nhập.</p>
+    </div>
+
+    <!-- MAN HINH 1: DANH SACH PHIEU -->
+    <div class="container">
+        <h2>1. Danh sách phiếu chưa phân công</h2>
 
         <button onclick="loadTickets()">Tải danh sách</button>
 
@@ -86,7 +142,7 @@
 
     <!-- MAN HINH 2: PHAN CONG KY THUAT VIEN -->
     <div class="container">
-        <h2>Phân công kỹ thuật viên</h2>
+        <h2>2. Phân công kỹ thuật viên</h2>
 
         <label for="ticketSelect">Chọn phiếu bảo hành:</label>
         <br>
@@ -104,7 +160,11 @@
 
         <br><br>
 
-        <button id="assignButton" onclick="assignTechnician()">
+        <button
+            id="assignButton"
+            onclick="assignTechnician()"
+            disabled
+        >
             Phân công
         </button>
 
@@ -113,7 +173,7 @@
 
     <!-- MAN HINH 3: DAT LICH HEN -->
     <div class="container">
-        <h2>Đặt lịch hẹn</h2>
+        <h2>3. Đặt lịch hẹn</h2>
 
         <label for="assignmentSelect">Chọn phân công:</label>
         <br>
@@ -151,7 +211,11 @@
 
         <br><br>
 
-        <button id="appointmentButton" onclick="createAppointment()">
+        <button
+            id="appointmentButton"
+            onclick="createAppointment()"
+            disabled
+        >
             Lưu lịch hẹn
         </button>
 
@@ -159,23 +223,147 @@
     </div>
 
     <script>
-        // HAM HO TRO KIEM TRA LOI API
-        async function checkResponse(response) {
-            if (response.ok) {
-                return response.json();
+        // QUAN LY TOKEN DANG NHAP
+        let accessToken =
+            sessionStorage.getItem("smartcrm_token") || "";
+
+        function updateLoginUI() {
+            const loggedIn = Boolean(accessToken);
+
+            document.getElementById("loginForm").hidden = loggedIn;
+            document.getElementById("logoutButton").hidden = !loggedIn;
+
+            document.getElementById("assignButton").disabled = !loggedIn;
+            document.getElementById("appointmentButton").disabled = !loggedIn;
+
+            document.getElementById("loginMessage").textContent =
+                loggedIn
+                    ? "Đã đăng nhập với quyền quản lý."
+                    : "Bạn chưa đăng nhập. Vui lòng đăng nhập để phân công và đặt lịch.";
+        }
+
+        function logoutManager(message = "Bạn đã đăng xuất.") {
+            accessToken = "";
+            sessionStorage.removeItem("smartcrm_token");
+
+            document.getElementById("loginPassword").value = "";
+
+            updateLoginUI();
+
+            document.getElementById("loginMessage").textContent =
+                message;
+        }
+
+        // DANG NHAP QUAN LY
+        async function loginManager(event) {
+            if (event) {
+                event.preventDefault();
             }
 
-            if (response.status === 401) {
-                throw new Error(
-                    "Chưa đăng nhập hoặc phiên đã hết hạn"
+            const username =
+                document.getElementById("loginUsername").value.trim();
+
+            const password =
+                document.getElementById("loginPassword").value;
+
+            const button =
+                document.getElementById("loginButton");
+
+            const message =
+                document.getElementById("loginMessage");
+
+            if (!username || !password) {
+                message.textContent =
+                    "Vui lòng nhập tên đăng nhập và mật khẩu.";
+                return;
+            }
+
+            button.disabled = true;
+            message.textContent = "Đang đăng nhập...";
+
+            try {
+                const response = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData =
+                        await response.json().catch(() => ({}));
+
+                    throw new Error(
+                        errorData.detail || "Đăng nhập thất bại."
+                    );
+                }
+
+                const data = await response.json();
+
+                if (!data.access_token || data.role !== "manager") {
+                    throw new Error(
+                        "Tài khoản không có quyền quản lý."
+                    );
+                }
+
+                accessToken = data.access_token;
+
+                sessionStorage.setItem(
+                    "smartcrm_token",
+                    accessToken
                 );
+
+                document.getElementById("loginPassword").value = "";
+
+                updateLoginUI();
+
+            } catch (error) {
+                message.textContent =
+                    "Lỗi đăng nhập: " + error.message;
+
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        // HAM HO TRO KIEM TRA LOI API
+        async function checkResponse(response) {
+            if (response.status === 401) {
+                logoutManager(
+                    "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại."
+                );
+
+                throw new Error(
+                    "Chưa đăng nhập hoặc phiên đã hết hạn."
+                );
+            }
+
+            if (response.ok) {
+                return response.json();
             }
 
             const data = await response.json().catch(() => ({}));
 
             throw new Error(
-                data.detail || "Có lỗi xảy ra khi kết nối API"
+                data.detail || "Có lỗi xảy ra khi kết nối API."
             );
+        }
+
+        function getAuthHeaders() {
+            if (!accessToken) {
+                throw new Error(
+                    "Vui lòng đăng nhập trước khi thực hiện."
+                );
+            }
+
+            return {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + accessToken
+            };
         }
 
         // MAN HINH 1: TAI DANH SACH PHIEU
@@ -226,7 +414,7 @@
             }
         }
 
-        // MAN HINH 2: TAI DANH SACH PHIEU VA KY THUAT VIEN
+        // MAN HINH 2: TAI PHIEU VA KY THUAT VIEN
         async function loadAssignmentOptions() {
             const ticketSelect =
                 document.getElementById("ticketSelect");
@@ -325,6 +513,12 @@
             const button =
                 document.getElementById("assignButton");
 
+            if (!accessToken) {
+                message.textContent =
+                    "Vui lòng đăng nhập trước khi phân công.";
+                return;
+            }
+
             if (!ticketId || !technicianId) {
                 message.textContent =
                     "Vui lòng chọn phiếu và kỹ thuật viên.";
@@ -339,9 +533,7 @@
                     "/api/tickets/" + ticketId + "/assign",
                     {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify({
                             ma_ky_thuat_vien:
                                 Number(technicianId)
@@ -366,7 +558,7 @@
                     "Lỗi: " + error.message;
 
             } finally {
-                button.disabled = false;
+                button.disabled = !accessToken;
             }
         }
 
@@ -443,6 +635,12 @@
             const button =
                 document.getElementById("appointmentButton");
 
+            if (!accessToken) {
+                message.textContent =
+                    "Vui lòng đăng nhập trước khi đặt lịch.";
+                return;
+            }
+
             if (!assignmentId || !date || !start || !end || !type) {
                 message.textContent =
                     "Vui lòng nhập đầy đủ thông tin.";
@@ -463,9 +661,7 @@
                     "/api/tickets/appointments",
                     {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify({
                             ma_phan_cong:
                                 Number(assignmentId),
@@ -494,11 +690,18 @@
                     "Lỗi: " + error.message;
 
             } finally {
-                button.disabled = false;
+                button.disabled = !accessToken;
             }
         }
 
-        // TAI DU LIEU KHI MO TRANG
+        // KHOI TAO TRANG
+        document.getElementById("loginForm").addEventListener(
+            "submit",
+            loginManager
+        );
+
+        updateLoginUI();
+
         loadTickets();
         loadAssignmentOptions();
         loadAssignments();
