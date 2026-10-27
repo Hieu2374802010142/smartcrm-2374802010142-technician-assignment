@@ -2,710 +2,1465 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartCRM L04</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCRM L04 - Quản lý bảo hành</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f5f6fa;
-        }
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --navy: #14213d;
+    --bg: #f3f6fb;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --white: #ffffff;
+}
 
-        h1 {
-            color: #234b8a;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+[hidden] {
+    display: none !important;
+}
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
+button, input, select {
+    font: inherit;
+}
 
-        th {
-            background: #e8eef8;
-        }
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 9px;
+    padding: 12px 18px;
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
 
-        button, select, input {
-            padding: 8px 12px;
-            margin-top: 8px;
-        }
+button:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
 
-        button {
-            cursor: pointer;
-        }
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    margin-top: 8px;
+    background: white;
+    color: var(--text);
+}
 
-        select {
-            min-width: 250px;
-        }
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px #dbeafe;
+}
 
-        #message,
-        #assignMessage,
-        #appointmentMessage,
-        #loginMessage {
-            margin-top: 15px;
-        }
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 17px;
+    color: #475569;
+}
 
-        #loginMessage {
-            color: #234b8a;
-        }
+/* DANG NHAP */
 
-        [hidden] {
-            display: none !important;
-        }
-    </style>
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #dbeafe, #eff6ff, #f8fafc);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    background: white;
+    padding: 42px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(37, 99, 235, 0.12);
+}
+
+.login-logo {
+    width: 64px;
+    height: 64px;
+    background: var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 22px;
+}
+
+.login-card h1 {
+    margin: 0;
+    font-size: 28px;
+    color: var(--navy);
+}
+
+.login-card .subtitle {
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.login-card button[type="submit"] {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+}
+
+.password-wrap {
+    position: relative;
+}
+
+.password-wrap input {
+    padding-right: 72px;
+}
+
+.show-password {
+    position: absolute;
+    right: 8px;
+    top: 13px;
+    background: transparent;
+    color: var(--primary);
+    padding: 7px;
+    font-size: 12px;
+}
+
+.show-password:hover {
+    background: #eff6ff !important;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* BO CUC QUAN LY */
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background: var(--navy);
+    color: white;
+    padding: 25px 16px;
+    flex-shrink: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 35px;
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.brand strong {
+    font-size: 19px;
+}
+
+.brand small {
+    color: #94a3b8;
+}
+
+.menu-title {
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 15px 12px;
+}
+
+.nav-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: #cbd5e1;
+    padding: 14px;
+    margin: 5px 0;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: #263f68 !important;
+    color: white;
+}
+
+.sidebar-bottom {
+    margin-top: 40px;
+    border-top: 1px solid #334155;
+    padding-top: 20px;
+}
+
+.logout-btn {
+    width: 100%;
+    background: #334155;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar {
+    height: 78px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+}
+
+.topbar h2 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.user-badge {
+    background: #eff6ff;
+    color: var(--primary-dark);
+    padding: 10px 15px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.content {
+    padding: 30px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.page-heading {
+    margin-bottom: 25px;
+}
+
+.page-heading h1 {
+    font-size: 27px;
+    margin: 0 0 8px;
+}
+
+.page-heading p {
+    color: var(--muted);
+    margin: 0;
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 26px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 15px rgba(15, 23, 42, 0.025);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.card-description {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 9px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.stat {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-top: 12px;
+}
+
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 700;
+    text-align: left;
+    padding: 15px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: bold;
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 24px;
+}
+
+.form-group {
+    min-width: 0;
+}
+
+.form-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e1 !important;
+}
+
+.message {
+    margin-top: 18px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 14px;
+}
+
+.message:empty {
+    display: none;
+}
+
+.message.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.message.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+.info-box {
+    background: #eff6ff;
+    padding: 18px;
+    border-radius: 10px;
+    color: #1e40af;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 205px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .app {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .topbar {
+        padding: 15px;
+    }
+
+    .content {
+        padding: 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .login-card {
+        padding: 28px;
+    }
+}
+</style>
 </head>
 
 <body>
 
-    <!-- DANG NHAP QUAN LY -->
-    <div class="container">
-        <h1>SmartCRM L04</h1>
-        <h2>Đăng nhập quản lý</h2>
+<!-- TRANG DANG NHAP -->
+<div id="loginPage" class="login-page">
+    <div class="login-card">
+        <div class="login-logo">S</div>
+
+        <h1>Chào mừng trở lại!</h1>
+
+        <p class="subtitle">
+            Đăng nhập vào SmartCRM để quản lý
+            phân công kỹ thuật viên và lịch hẹn.
+        </p>
 
         <form id="loginForm">
-            <label for="loginUsername">Tên đăng nhập:</label>
-            <br>
+            <label for="loginUsername">
+                Tên đăng nhập
+            </label>
+
             <input
                 type="text"
                 id="loginUsername"
                 value="manager"
                 autocomplete="username"
+                placeholder="Nhập tên đăng nhập"
                 required
             >
 
-            <br><br>
+            <label for="loginPassword">
+                Mật khẩu
+            </label>
 
-            <label for="loginPassword">Mật khẩu:</label>
-            <br>
-            <input
-                type="password"
-                id="loginPassword"
-                autocomplete="current-password"
-                required
-            >
+            <div class="password-wrap">
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Nhập mật khẩu"
+                    autocomplete="current-password"
+                    required
+                >
 
-            <br><br>
+                <button
+                    type="button"
+                    class="show-password"
+                    onclick="togglePassword()"
+                >
+                    Hiện
+                </button>
+            </div>
 
             <button type="submit" id="loginButton">
                 Đăng nhập
             </button>
         </form>
 
-        <button id="logoutButton" onclick="logoutManager()" hidden>
-            Đăng xuất
-        </button>
+        <p id="loginMessage" class="message">
+            Vui lòng đăng nhập để tiếp tục.
+        </p>
 
-        <p id="loginMessage">Bạn chưa đăng nhập.</p>
+        <div class="login-footer">
+            SmartCRM L04 - Hệ thống quản lý bảo hành
+        </div>
     </div>
+</div>
 
-    <!-- MAN HINH 1: DANH SACH PHIEU -->
-    <div class="container">
-        <h2>1. Danh sách phiếu chưa phân công</h2>
+<!-- GIAO DIEN QUAN LY -->
+<div id="appPage" class="app" hidden>
 
-        <button onclick="loadTickets()">Tải danh sách</button>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">S</div>
 
-        <p id="message">Đang tải dữ liệu...</p>
+            <div>
+                <strong>SmartCRM</strong><br>
+                <small>Technician Management</small>
+            </div>
+        </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Mã phiếu</th>
-                    <th>Thiết bị</th>
-                    <th>Khách hàng</th>
-                    <th>Số điện thoại</th>
-                    <th>Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody id="ticketTable"></tbody>
-        </table>
-    </div>
-
-    <!-- MAN HINH 2: PHAN CONG KY THUAT VIEN -->
-    <div class="container">
-        <h2>2. Phân công kỹ thuật viên</h2>
-
-        <label for="ticketSelect">Chọn phiếu bảo hành:</label>
-        <br>
-        <select id="ticketSelect">
-            <option value="">Đang tải phiếu...</option>
-        </select>
-
-        <br><br>
-
-        <label for="technicianSelect">Chọn kỹ thuật viên:</label>
-        <br>
-        <select id="technicianSelect">
-            <option value="">Đang tải kỹ thuật viên...</option>
-        </select>
-
-        <br><br>
+        <div class="menu-title">QUẢN LÝ</div>
 
         <button
-            id="assignButton"
-            onclick="assignTechnician()"
-            disabled
+            class="nav-item active"
+            data-page="dashboard"
+            onclick="showPage('dashboard')"
         >
-            Phân công
+            ◫ &nbsp; Tổng quan
         </button>
-
-        <p id="assignMessage"></p>
-    </div>
-
-    <!-- MAN HINH 3: DAT LICH HEN -->
-    <div class="container">
-        <h2>3. Đặt lịch hẹn</h2>
-
-        <label for="assignmentSelect">Chọn phân công:</label>
-        <br>
-        <select id="assignmentSelect">
-            <option value="">Đang tải phân công...</option>
-        </select>
-
-        <br><br>
-
-        <label for="appointmentDate">Ngày hẹn:</label>
-        <br>
-        <input type="date" id="appointmentDate">
-
-        <br><br>
-
-        <label for="startTime">Giờ bắt đầu:</label>
-        <br>
-        <input type="time" id="startTime">
-
-        <br><br>
-
-        <label for="endTime">Giờ kết thúc:</label>
-        <br>
-        <input type="time" id="endTime">
-
-        <br><br>
-
-        <label for="appointmentType">Loại lịch hẹn:</label>
-        <br>
-        <select id="appointmentType">
-            <option value="">-- Chọn loại lịch --</option>
-            <option value="Nhan thiet bi">Nhận thiết bị</option>
-            <option value="Tra thiet bi">Trả thiết bị</option>
-        </select>
-
-        <br><br>
 
         <button
-            id="appointmentButton"
-            onclick="createAppointment()"
-            disabled
+            class="nav-item"
+            data-page="tickets"
+            onclick="showPage('tickets')"
         >
-            Lưu lịch hẹn
+            ▤ &nbsp; Phiếu bảo hành
         </button>
 
-        <p id="appointmentMessage"></p>
-    </div>
+        <button
+            class="nav-item"
+            data-page="assignment"
+            onclick="showPage('assignment')"
+        >
+            ◉ &nbsp; Phân công KTV
+        </button>
 
-    <script>
-        // QUAN LY TOKEN DANG NHAP
-        let accessToken =
-            sessionStorage.getItem("smartcrm_token") || "";
+        <button
+            class="nav-item"
+            data-page="appointment"
+            onclick="showPage('appointment')"
+        >
+            ▦ &nbsp; Đặt lịch hẹn
+        </button>
 
-        function updateLoginUI() {
-            const loggedIn = Boolean(accessToken);
+        <div class="sidebar-bottom">
+            <button
+                class="logout-btn"
+                onclick="logoutManager()"
+            >
+                Đăng xuất
+            </button>
+        </div>
+    </aside>
 
-            document.getElementById("loginForm").hidden = loggedIn;
-            document.getElementById("logoutButton").hidden = !loggedIn;
+    <main class="main">
+        <header class="topbar">
+            <h2>Hệ thống quản lý bảo hành</h2>
+            <div class="user-badge">
+                ● Quản lý trung tâm
+            </div>
+        </header>
 
-            document.getElementById("assignButton").disabled = !loggedIn;
-            document.getElementById("appointmentButton").disabled = !loggedIn;
+        <div class="content">
 
-            document.getElementById("loginMessage").textContent =
-                loggedIn
-                    ? "Đã đăng nhập với quyền quản lý."
-                    : "Bạn chưa đăng nhập. Vui lòng đăng nhập để phân công và đặt lịch.";
-        }
+            <!-- TONG QUAN -->
+            <section id="dashboard" class="section active">
 
-        function logoutManager(message = "Bạn đã đăng xuất.") {
-            accessToken = "";
-            sessionStorage.removeItem("smartcrm_token");
+                <div class="page-heading">
+                    <h1>Tổng quan hệ thống</h1>
+                    <p>
+                        Theo dõi hoạt động phân công
+                        và quản lý lịch hẹn.
+                    </p>
+                </div>
 
-            document.getElementById("loginPassword").value = "";
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-icon">▤</div>
+                        <div class="stat-label">
+                            Phiếu chưa phân công
+                        </div>
+                        <div class="stat-value" id="totalTickets">
+                            --
+                        </div>
+                    </div>
 
-            updateLoginUI();
+                    <div class="stat">
+                        <div class="stat-icon">◉</div>
+                        <div class="stat-label">
+                            Kỹ thuật viên hoạt động
+                        </div>
+                        <div class="stat-value" id="totalTechnicians">
+                            --
+                        </div>
+                    </div>
 
-            document.getElementById("loginMessage").textContent =
-                message;
-        }
+                    <div class="stat">
+                        <div class="stat-icon">▦</div>
+                        <div class="stat-label">
+                            Tổng phân công
+                        </div>
+                        <div class="stat-value" id="totalAssignments">
+                            --
+                        </div>
+                    </div>
+                </div>
 
-        // DANG NHAP QUAN LY
-        async function loginManager(event) {
-            if (event) {
-                event.preventDefault();
-            }
+                <div class="card">
+                    <h3>Chào mừng đến với SmartCRM L04</h3>
 
-            const username =
-                document.getElementById("loginUsername").value.trim();
+                    <p class="card-description">
+                        Hệ thống hỗ trợ quản lý phiếu bảo hành,
+                        phân công kỹ thuật viên và đặt lịch hẹn.
+                    </p>
 
-            const password =
-                document.getElementById("loginPassword").value;
+                    <div class="info-box">
+                        Chọn chức năng ở menu bên trái
+                        để bắt đầu quản lý.
+                    </div>
 
-            const button =
-                document.getElementById("loginButton");
+                    <button onclick="showPage('assignment')">
+                        Đi đến phân công kỹ thuật viên
+                    </button>
+                </div>
+            </section>
 
-            const message =
-                document.getElementById("loginMessage");
+            <!-- DANH SACH PHIEU -->
+            <section id="tickets" class="section">
 
-            if (!username || !password) {
-                message.textContent =
-                    "Vui lòng nhập tên đăng nhập và mật khẩu.";
-                return;
-            }
+                <div class="page-heading">
+                    <h1>Danh sách phiếu bảo hành</h1>
+                    <p>
+                        Các phiếu đang chờ phân công kỹ thuật viên.
+                    </p>
+                </div>
 
-            button.disabled = true;
-            message.textContent = "Đang đăng nhập...";
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Phiếu chưa phân công</h3>
 
-            try {
-                const response = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password
-                    })
-                });
+                        <button onclick="loadTickets()">
+                            ↻ Làm mới
+                        </button>
+                    </div>
 
-                if (!response.ok) {
-                    const errorData =
-                        await response.json().catch(() => ({}));
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mã phiếu</th>
+                                    <th>Thiết bị</th>
+                                    <th>Khách hàng</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
 
-                    throw new Error(
-                        errorData.detail || "Đăng nhập thất bại."
-                    );
-                }
+                            <tbody id="ticketTable"></tbody>
+                        </table>
+                    </div>
 
-                const data = await response.json();
+                    <p id="message" class="message"></p>
+                </div>
+            </section>
 
-                if (!data.access_token || data.role !== "manager") {
-                    throw new Error(
-                        "Tài khoản không có quyền quản lý."
-                    );
-                }
+            <!-- PHAN CONG -->
+            <section id="assignment" class="section">
 
-                accessToken = data.access_token;
+                <div class="page-heading">
+                    <h1>Phân công kỹ thuật viên</h1>
+                    <p>
+                        Lựa chọn phiếu bảo hành và kỹ thuật viên phù hợp.
+                    </p>
+                </div>
 
-                sessionStorage.setItem(
-                    "smartcrm_token",
-                    accessToken
-                );
+                <div class="card">
+                    <h3>Thông tin phân công</h3>
 
-                document.getElementById("loginPassword").value = "";
+                    <p class="card-description">
+                        Vui lòng chọn đầy đủ thông tin trước khi lưu.
+                    </p>
 
-                updateLoginUI();
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ticketSelect">
+                                Phiếu bảo hành
+                            </label>
 
-            } catch (error) {
-                message.textContent =
-                    "Lỗi đăng nhập: " + error.message;
+                            <select id="ticketSelect">
+                                <option value="">
+                                    Đang tải phiếu...
+                                </option>
+                            </select>
+                        </div>
 
-            } finally {
-                button.disabled = false;
-            }
-        }
+                        <div class="form-group">
+                            <label for="technicianSelect">
+                                Kỹ thuật viên
+                            </label>
 
-        // HAM HO TRO KIEM TRA LOI API
-        async function checkResponse(response) {
-            if (response.status === 401) {
-                logoutManager(
-                    "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại."
-                );
+                            <select id="technicianSelect">
+                                <option value="">
+                                    Đang tải kỹ thuật viên...
+                                </option>
+                            </select>
+                        </div>
+                    </div>
 
-                throw new Error(
-                    "Chưa đăng nhập hoặc phiên đã hết hạn."
-                );
-            }
+                    <div class="form-actions">
+                        <button
+                            id="assignButton"
+                            onclick="assignTechnician()"
+                            disabled
+                        >
+                            Xác nhận phân công
+                        </button>
 
-            if (response.ok) {
-                return response.json();
-            }
+                        <button
+                            class="btn-secondary"
+                            onclick="loadAssignmentOptions()"
+                        >
+                            Làm mới
+                        </button>
+                    </div>
 
-            const data = await response.json().catch(() => ({}));
+                    <p id="assignMessage" class="message"></p>
+                </div>
 
+                <div class="info-box">
+                    Sau khi phân công thành công,
+                    bạn có thể chuyển sang chức năng
+                    Đặt lịch hẹn để sắp xếp thời gian.
+                </div>
+            </section>
+
+            <!-- DAT LICH -->
+            <section id="appointment" class="section">
+
+                <div class="page-heading">
+                    <h1>Đặt lịch hẹn</h1>
+                    <p>
+                        Quản lý thời gian nhận và trả thiết bị.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>Thông tin lịch hẹn</h3>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="assignmentSelect">
+                                Chọn phân công
+                            </label>
+
+                            <select id="assignmentSelect">
+                                <option value="">
+                                    Đang tải phân công...
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appointmentType">
+                                Loại lịch hẹn
+                            </label>
+
+                            <select id="appointmentType">
+                                <option value="">
+                                    -- Chọn loại lịch --
+                                </option>
+                                <option value="Nhan thiet bi">
+                                    Nhận thiết bị
+                                </option>
+                                <option value="Tra thiet bi">
+                                    Trả thiết bị
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="appointmentDate">
+                                Ngày hẹn
+                            </label>
+
+                            <input
+                                type="date"
+                                id="appointmentDate"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="startTime">
+                                Giờ bắt đầu
+                            </label>
+
+                            <input
+                                type="time"
+                                id="startTime"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endTime">
+                                Giờ kết thúc
+                            </label>
+
+                            <input
+                                type="time"
+                                id="endTime"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button
+                            id="appointmentButton"
+                            onclick="createAppointment()"
+                            disabled
+                        >
+                            Lưu lịch hẹn
+                        </button>
+
+                        <button
+                            class="btn-secondary"
+                            onclick="loadAssignments()"
+                        >
+                            Làm mới
+                        </button>
+                    </div>
+
+                    <p id="appointmentMessage" class="message"></p>
+                </div>
+
+                <div class="info-box">
+                    Hệ thống sẽ kiểm tra lịch trùng
+                    khi bạn thực hiện lưu lịch hẹn.
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<script>
+let accessToken =
+    sessionStorage.getItem("smartcrm_token") || "";
+
+function setMessage(id, text, type = "") {
+    const element = document.getElementById(id);
+    element.textContent = text;
+    element.className = "message " + type;
+}
+
+function togglePassword() {
+    const input = document.getElementById("loginPassword");
+    const button = document.querySelector(".show-password");
+
+    const visible = input.type === "password";
+
+    input.type = visible ? "text" : "password";
+    button.textContent = visible ? "Ẩn" : "Hiện";
+}
+
+function showPage(page) {
+    document.querySelectorAll(".section").forEach(section => {
+        section.classList.remove("active");
+    });
+
+    document.getElementById(page).classList.add("active");
+
+    document.querySelectorAll(".nav-item").forEach(button => {
+        button.classList.toggle(
+            "active",
+            button.dataset.page === page
+        );
+    });
+
+    if (page === "tickets") loadTickets();
+    if (page === "assignment") loadAssignmentOptions();
+    if (page === "appointment") loadAssignments();
+}
+
+function updateLoginUI() {
+    const loggedIn = Boolean(accessToken);
+
+    document.getElementById("loginPage").hidden = loggedIn;
+    document.getElementById("appPage").hidden = !loggedIn;
+
+    document.getElementById("assignButton").disabled = !loggedIn;
+    document.getElementById("appointmentButton").disabled = !loggedIn;
+
+    if (loggedIn) {
+        loadDashboard();
+    }
+}
+
+function logoutManager(message = "Bạn đã đăng xuất.") {
+    accessToken = "";
+    sessionStorage.removeItem("smartcrm_token");
+
+    document.getElementById("loginPassword").value = "";
+
+    updateLoginUI();
+    setMessage("loginMessage", message);
+}
+
+async function loginManager(event) {
+    event.preventDefault();
+
+    const username =
+        document.getElementById("loginUsername").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    const button =
+        document.getElementById("loginButton");
+
+    if (!username || !password) {
+        setMessage(
+            "loginMessage",
+            "Vui lòng nhập đầy đủ thông tin.",
+            "error"
+        );
+        return;
+    }
+
+    button.disabled = true;
+    setMessage("loginMessage", "Đang đăng nhập...");
+
+    try {
+        const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username,
+                password
+            })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
             throw new Error(
-                data.detail || "Có lỗi xảy ra khi kết nối API."
+                data.detail || "Đăng nhập thất bại."
             );
         }
 
-        function getAuthHeaders() {
-            if (!accessToken) {
-                throw new Error(
-                    "Vui lòng đăng nhập trước khi thực hiện."
-                );
-            }
-
-            return {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + accessToken
-            };
+        if (!data.access_token || data.role !== "manager") {
+            throw new Error("Tài khoản không có quyền quản lý.");
         }
 
-        // MAN HINH 1: TAI DANH SACH PHIEU
-        async function loadTickets() {
-            const message = document.getElementById("message");
-            const table = document.getElementById("ticketTable");
-
-            message.textContent = "Đang tải dữ liệu...";
-            table.innerHTML = "";
-
-            try {
-                const response = await fetch(
-                    "/api/tickets/unassigned"
-                );
-
-                const data = await checkResponse(response);
-
-                if (data.tickets.length === 0) {
-                    message.textContent =
-                        "Không có phiếu chưa phân công.";
-                    return;
-                }
-
-                message.textContent =
-                    "Tổng số phiếu: " + data.total;
-
-                data.tickets.forEach(ticket => {
-                    const row = document.createElement("tr");
-
-                    [
-                        ticket.ma_phieu,
-                        ticket.ten_thiet_bi,
-                        ticket.ten_khach_hang,
-                        ticket.so_dien_thoai,
-                        ticket.trang_thai
-                    ].forEach(value => {
-                        const cell = document.createElement("td");
-                        cell.textContent = value ?? "";
-                        row.appendChild(cell);
-                    });
-
-                    table.appendChild(row);
-                });
-
-            } catch (error) {
-                message.textContent =
-                    "Lỗi: " + error.message;
-            }
-        }
-
-        // MAN HINH 2: TAI PHIEU VA KY THUAT VIEN
-        async function loadAssignmentOptions() {
-            const ticketSelect =
-                document.getElementById("ticketSelect");
-
-            const technicianSelect =
-                document.getElementById("technicianSelect");
-
-            const message =
-                document.getElementById("assignMessage");
-
-            ticketSelect.innerHTML =
-                '<option value="">Đang tải phiếu...</option>';
-
-            technicianSelect.innerHTML =
-                '<option value="">Đang tải kỹ thuật viên...</option>';
-
-            try {
-                const [ticketResponse, technicianResponse] =
-                    await Promise.all([
-                        fetch("/api/tickets/unassigned"),
-                        fetch("/api/technicians")
-                    ]);
-
-                const ticketData =
-                    await checkResponse(ticketResponse);
-
-                const technicianData =
-                    await checkResponse(technicianResponse);
-
-                ticketSelect.innerHTML =
-                    '<option value="">-- Chọn phiếu --</option>';
-
-                technicianSelect.innerHTML =
-                    '<option value="">-- Chọn kỹ thuật viên --</option>';
-
-                ticketData.tickets.forEach(ticket => {
-                    const option = document.createElement("option");
-
-                    option.value = ticket.ma_phieu;
-                    option.textContent =
-                        "Phiếu " + ticket.ma_phieu +
-                        " - " + ticket.ten_thiet_bi;
-
-                    ticketSelect.appendChild(option);
-                });
-
-                const activeTechnicians =
-                    technicianData.technicians.filter(
-                        technician =>
-                            technician.dang_hoat_dong === 1
-                    );
-
-                activeTechnicians.forEach(technician => {
-                    const option = document.createElement("option");
-
-                    option.value =
-                        technician.ma_ky_thuat_vien;
-
-                    option.textContent =
-                        technician.ho_ten +
-                        " - " + technician.chuyen_mon;
-
-                    technicianSelect.appendChild(option);
-                });
-
-                if (ticketData.tickets.length === 0) {
-                    message.textContent =
-                        "Không có phiếu cần phân công.";
-                } else {
-                    message.textContent = "";
-                }
-
-            } catch (error) {
-                ticketSelect.innerHTML =
-                    '<option value="">Không tải được phiếu</option>';
-
-                technicianSelect.innerHTML =
-                    '<option value="">Không tải được kỹ thuật viên</option>';
-
-                message.textContent =
-                    "Lỗi: " + error.message;
-            }
-        }
-
-        // MAN HINH 2: THUC HIEN PHAN CONG
-        async function assignTechnician() {
-            const ticketId =
-                document.getElementById("ticketSelect").value;
-
-            const technicianId =
-                document.getElementById("technicianSelect").value;
-
-            const message =
-                document.getElementById("assignMessage");
-
-            const button =
-                document.getElementById("assignButton");
-
-            if (!accessToken) {
-                message.textContent =
-                    "Vui lòng đăng nhập trước khi phân công.";
-                return;
-            }
-
-            if (!ticketId || !technicianId) {
-                message.textContent =
-                    "Vui lòng chọn phiếu và kỹ thuật viên.";
-                return;
-            }
-
-            message.textContent = "Đang phân công...";
-            button.disabled = true;
-
-            try {
-                const response = await fetch(
-                    "/api/tickets/" + ticketId + "/assign",
-                    {
-                        method: "POST",
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify({
-                            ma_ky_thuat_vien:
-                                Number(technicianId)
-                        })
-                    }
-                );
-
-                const data = await checkResponse(response);
-
-                const successMessage =
-                    "Phân công thành công! Mã phân công: " +
-                    data.ma_phan_cong;
-
-                await loadTickets();
-                await loadAssignmentOptions();
-                await loadAssignments();
-
-                message.textContent = successMessage;
-
-            } catch (error) {
-                message.textContent =
-                    "Lỗi: " + error.message;
-
-            } finally {
-                button.disabled = !accessToken;
-            }
-        }
-
-        // MAN HINH 3: TAI DANH SACH PHAN CONG
-        async function loadAssignments() {
-            const select =
-                document.getElementById("assignmentSelect");
-
-            const message =
-                document.getElementById("appointmentMessage");
-
-            select.innerHTML =
-                '<option value="">Đang tải phân công...</option>';
-
-            try {
-                const response = await fetch(
-                    "/api/tickets/assignments"
-                );
-
-                const data = await checkResponse(response);
-
-                select.innerHTML =
-                    '<option value="">-- Chọn phân công --</option>';
-
-                data.assignments.forEach(assignment => {
-                    const option = document.createElement("option");
-
-                    option.value = assignment.ma_phan_cong;
-
-                    option.textContent =
-                        "Phân công " + assignment.ma_phan_cong +
-                        " - " + assignment.ten_thiet_bi +
-                        " - " + assignment.ten_ky_thuat_vien;
-
-                    select.appendChild(option);
-                });
-
-                if (data.assignments.length === 0) {
-                    message.textContent =
-                        "Chưa có phân công để đặt lịch.";
-                } else {
-                    message.textContent = "";
-                }
-
-            } catch (error) {
-                select.innerHTML =
-                    '<option value="">Không tải được phân công</option>';
-
-                message.textContent =
-                    "Lỗi: " + error.message;
-            }
-        }
-
-        // MAN HINH 3: LUU LICH HEN
-        async function createAppointment() {
-            const assignmentId =
-                document.getElementById("assignmentSelect").value;
-
-            const date =
-                document.getElementById("appointmentDate").value;
-
-            const start =
-                document.getElementById("startTime").value;
-
-            const end =
-                document.getElementById("endTime").value;
-
-            const type =
-                document.getElementById("appointmentType").value;
-
-            const message =
-                document.getElementById("appointmentMessage");
-
-            const button =
-                document.getElementById("appointmentButton");
-
-            if (!accessToken) {
-                message.textContent =
-                    "Vui lòng đăng nhập trước khi đặt lịch.";
-                return;
-            }
-
-            if (!assignmentId || !date || !start || !end || !type) {
-                message.textContent =
-                    "Vui lòng nhập đầy đủ thông tin.";
-                return;
-            }
-
-            if (end <= start) {
-                message.textContent =
-                    "Giờ kết thúc phải sau giờ bắt đầu.";
-                return;
-            }
-
-            message.textContent = "Đang lưu lịch hẹn...";
-            button.disabled = true;
-
-            try {
-                const response = await fetch(
-                    "/api/tickets/appointments",
-                    {
-                        method: "POST",
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify({
-                            ma_phan_cong:
-                                Number(assignmentId),
-                            ngay_hen: date,
-                            gio_bat_dau: start,
-                            gio_ket_thuc: end,
-                            loai_lich_hen: type
-                        })
-                    }
-                );
-
-                if (response.status === 409) {
-                    throw new Error(
-                        "Lịch hẹn bị trùng với lịch của kỹ thuật viên."
-                    );
-                }
-
-                const data = await checkResponse(response);
-
-                message.textContent =
-                    "Đặt lịch thành công! Mã lịch hẹn: " +
-                    data.ma_lich_hen;
-
-            } catch (error) {
-                message.textContent =
-                    "Lỗi: " + error.message;
-
-            } finally {
-                button.disabled = !accessToken;
-            }
-        }
-
-        // KHOI TAO TRANG
-        document.getElementById("loginForm").addEventListener(
-            "submit",
-            loginManager
+        accessToken = data.access_token;
+
+        sessionStorage.setItem(
+            "smartcrm_token",
+            accessToken
         );
 
+        document.getElementById("loginPassword").value = "";
+
         updateLoginUI();
+        showPage("dashboard");
 
-        loadTickets();
-        loadAssignmentOptions();
-        loadAssignments();
-    </script>
+    } catch (error) {
+        setMessage(
+            "loginMessage",
+            "Lỗi đăng nhập: " + error.message,
+            "error"
+        );
+    } finally {
+        button.disabled = false;
+    }
+}
 
+async function checkResponse(response) {
+    if (response.status === 401) {
+        logoutManager(
+            "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại."
+        );
+        throw new Error("Phiên đăng nhập không hợp lệ.");
+    }
+
+    if (response.ok) {
+        return response.json();
+    }
+
+    const data = await response.json().catch(() => ({}));
+
+    throw new Error(
+        typeof data.detail === "string"
+            ? data.detail
+            : "Có lỗi xảy ra khi kết nối API."
+    );
+}
+
+function getAuthHeaders() {
+    if (!accessToken) {
+        throw new Error("Vui lòng đăng nhập trước.");
+    }
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + accessToken
+    };
+}
+
+/* TONG QUAN */
+async function loadDashboard() {
+    try {
+        const [ticketResponse, technicianResponse, assignmentResponse] =
+            await Promise.all([
+                fetch("/api/tickets/unassigned"),
+                fetch("/api/technicians"),
+                fetch("/api/tickets/assignments")
+            ]);
+
+        const tickets = await checkResponse(ticketResponse);
+        const technicians = await checkResponse(technicianResponse);
+        const assignments = await checkResponse(assignmentResponse);
+
+        document.getElementById("totalTickets").textContent =
+            tickets.total ?? tickets.tickets.length;
+
+        document.getElementById("totalTechnicians").textContent =
+            technicians.technicians.filter(
+                item => Number(item.dang_hoat_dong) === 1
+            ).length;
+
+        document.getElementById("totalAssignments").textContent =
+            assignments.assignments.length;
+
+    } catch (error) {
+        console.error("Không tải được tổng quan:", error);
+    }
+}
+
+/* DANH SACH PHIEU */
+async function loadTickets() {
+    const table = document.getElementById("ticketTable");
+    table.innerHTML = "";
+
+    setMessage("message", "Đang tải dữ liệu...");
+
+    try {
+        const response = await fetch("/api/tickets/unassigned");
+        const data = await checkResponse(response);
+
+        if (data.tickets.length === 0) {
+            setMessage(
+                "message",
+                "Không có phiếu chưa phân công."
+            );
+            return;
+        }
+
+        data.tickets.forEach(ticket => {
+            const row = document.createElement("tr");
+
+            [
+                ticket.ma_phieu,
+                ticket.ten_thiet_bi,
+                ticket.ten_khach_hang,
+                ticket.so_dien_thoai,
+                ticket.trang_thai
+            ].forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value ?? "";
+                row.appendChild(cell);
+            });
+
+            table.appendChild(row);
+        });
+
+        setMessage(
+            "message",
+            "Tổng số phiếu: " + data.total,
+            "success"
+        );
+
+    } catch (error) {
+        setMessage(
+            "message",
+            "Lỗi: " + error.message,
+            "error"
+        );
+    }
+}
+
+/* TAI LUA CHON PHAN CONG */
+async function loadAssignmentOptions() {
+    const ticketSelect =
+        document.getElementById("ticketSelect");
+
+    const technicianSelect =
+        document.getElementById("technicianSelect");
+
+    ticketSelect.innerHTML =
+        '<option value="">Đang tải phiếu...</option>';
+
+    technicianSelect.innerHTML =
+        '<option value="">Đang tải kỹ thuật viên...</option>';
+
+    try {
+        const [ticketResponse, technicianResponse] =
+            await Promise.all([
+                fetch("/api/tickets/unassigned"),
+                fetch("/api/technicians")
+            ]);
+
+        const ticketData = await checkResponse(ticketResponse);
+        const technicianData = await checkResponse(technicianResponse);
+
+        ticketSelect.innerHTML =
+            '<option value="">-- Chọn phiếu bảo hành --</option>';
+
+        technicianSelect.innerHTML =
+            '<option value="">-- Chọn kỹ thuật viên --</option>';
+
+        ticketData.tickets.forEach(ticket => {
+            const option = document.createElement("option");
+            option.value = ticket.ma_phieu;
+            option.textContent =
+                "Phiếu " + ticket.ma_phieu +
+                " - " + ticket.ten_thiet_bi;
+
+            ticketSelect.appendChild(option);
+        });
+
+        const activeTechnicians =
+            technicianData.technicians.filter(
+                technician =>
+                    Number(technician.dang_hoat_dong) === 1
+            );
+
+        activeTechnicians.forEach(technician => {
+            const option = document.createElement("option");
+
+            option.value = technician.ma_ky_thuat_vien;
+            option.textContent =
+                technician.ho_ten +
+                " - " + technician.chuyen_mon;
+
+            technicianSelect.appendChild(option);
+        });
+
+        if (ticketData.tickets.length === 0) {
+            setMessage(
+                "assignMessage",
+                "Không có phiếu cần phân công."
+            );
+        } else {
+            setMessage("assignMessage", "");
+        }
+
+    } catch (error) {
+        ticketSelect.innerHTML =
+            '<option value="">Không tải được phiếu</option>';
+
+        technicianSelect.innerHTML =
+            '<option value="">Không tải được kỹ thuật viên</option>';
+
+        setMessage(
+            "assignMessage",
+            "Lỗi: " + error.message,
+            "error"
+        );
+    }
+}
+
+/* THUC HIEN PHAN CONG */
+async function assignTechnician() {
+    const ticketId =
+        document.getElementById("ticketSelect").value;
+
+    const technicianId =
+        document.getElementById("technicianSelect").value;
+
+    const button =
+        document.getElementById("assignButton");
+
+    if (!accessToken) {
+        setMessage(
+            "assignMessage",
+            "Vui lòng đăng nhập.",
+            "error"
+        );
+        return;
+    }
+
+    if (!ticketId || !technicianId) {
+        setMessage(
+            "assignMessage",
+            "Vui lòng chọn phiếu và kỹ thuật viên.",
+            "error"
+        );
+        return;
+    }
+
+    button.disabled = true;
+    setMessage("assignMessage", "Đang phân công...");
+
+    try {
+        const response = await fetch(
+            "/api/tickets/" + ticketId + "/assign",
+            {
+                method: "POST",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    ma_ky_thuat_vien: Number(technicianId)
+                })
+            }
+        );
+
+        const data = await checkResponse(response);
+
+        await Promise.all([
+            loadTickets(),
+            loadAssignmentOptions(),
+            loadAssignments(),
+            loadDashboard()
+        ]);
+
+        setMessage(
+            "assignMessage",
+            "Phân công thành công! Mã phân công: " +
+            data.ma_phan_cong,
+            "success"
+        );
+
+    } catch (error) {
+        setMessage(
+            "assignMessage",
+            "Lỗi: " + error.message,
+            "error"
+        );
+    } finally {
+        button.disabled = !accessToken;
+    }
+}
+
+/* DANH SACH PHAN CONG */
+async function loadAssignments() {
+    const select =
+        document.getElementById("assignmentSelect");
+
+    select.innerHTML =
+        '<option value="">Đang tải phân công...</option>';
+
+    try {
+        const response = await fetch(
+            "/api/tickets/assignments"
+        );
+
+        const data = await checkResponse(response);
+
+        select.innerHTML =
+            '<option value="">-- Chọn phân công --</option>';
+
+        data.assignments.forEach(assignment => {
+            const option = document.createElement("option");
+
+            option.value = assignment.ma_phan_cong;
+
+            option.textContent =
+                "Phân công " + assignment.ma_phan_cong +
+                " - " + assignment.ten_thiet_bi +
+                " - " + assignment.ten_ky_thuat_vien;
+
+            select.appendChild(option);
+        });
+
+        if (data.assignments.length === 0) {
+            setMessage(
+                "appointmentMessage",
+                "Chưa có phân công để đặt lịch."
+            );
+        } else {
+            setMessage("appointmentMessage", "");
+        }
+
+    } catch (error) {
+        select.innerHTML =
+            '<option value="">Không tải được phân công</option>';
+
+        setMessage(
+            "appointmentMessage",
+            "Lỗi: " + error.message,
+            "error"
+        );
+    }
+}
+
+/* DAT LICH HEN */
+async function createAppointment() {
+    const assignmentId =
+        document.getElementById("assignmentSelect").value;
+
+    const date =
+        document.getElementById("appointmentDate").value;
+
+    const start =
+        document.getElementById("startTime").value;
+
+    const end =
+        document.getElementById("endTime").value;
+
+    const type =
+        document.getElementById("appointmentType").value;
+
+    const button =
+        document.getElementById("appointmentButton");
+
+    if (!accessToken) {
+        setMessage(
+            "appointmentMessage",
+            "Vui lòng đăng nhập.",
+            "error"
+        );
+        return;
+    }
+
+    if (!assignmentId || !date || !start || !end || !type) {
+        setMessage(
+            "appointmentMessage",
+            "Vui lòng nhập đầy đủ thông tin.",
+            "error"
+        );
+        return;
+    }
+
+    if (end <= start) {
+        setMessage(
+            "appointmentMessage",
+            "Giờ kết thúc phải sau giờ bắt đầu.",
+            "error"
+        );
+        return;
+    }
+
+    button.disabled = true;
+    setMessage(
+        "appointmentMessage",
+        "Đang lưu lịch hẹn..."
+    );
+
+    try {
+        const response = await fetch(
+            "/api/tickets/appointments",
+            {
+                method: "POST",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    ma_phan_cong: Number(assignmentId),
+                    ngay_hen: date,
+                    gio_bat_dau: start,
+                    gio_ket_thuc: end,
+                    loai_lich_hen: type
+                })
+            }
+        );
+
+        if (response.status === 409) {
+            throw new Error(
+                "Lịch hẹn bị trùng với lịch của kỹ thuật viên."
+            );
+        }
+
+        const data = await checkResponse(response);
+
+        setMessage(
+            "appointmentMessage",
+            "Đặt lịch thành công! Mã lịch hẹn: " +
+            data.ma_lich_hen,
+            "success"
+        );
+
+    } catch (error) {
+        setMessage(
+            "appointmentMessage",
+            "Lỗi: " + error.message,
+            "error"
+        );
+    } finally {
+        button.disabled = !accessToken;
+    }
+}
+
+/* KHOI TAO */
+document.getElementById("loginForm").addEventListener(
+    "submit",
+    loginManager
+);
+
+updateLoginUI();
+
+</script>
 </body>
 </html>
