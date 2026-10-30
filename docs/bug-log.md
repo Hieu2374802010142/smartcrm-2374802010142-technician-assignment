@@ -78,3 +78,63 @@ Lưu ý: BUG-02 đến BUG-05 bao gồm cả rủi ro và vấn đề thiết k�
 **Kết quả kiểm thử tại thời điểm tổng hợp:** 27/27 PASS.
 
 **Phiên bản mã nguồn được kiểm tra:** `f54f007` – tag `v0.2`.
+## 4. Truy vết commit và bằng chứng kiểm chứng
+
+Các liên kết dưới đây ghi nhận những commit triển khai hoặc cải tiến thành phần liên quan. Không phải mọi mục đều là lỗi đã phát sinh trong quá trình chạy chương trình.
+
+| Mã | Phân loại | Commit liên quan | Bằng chứng |
+|---|---|---|---|
+| BUG-01 | Lỗi môi trường chạy thực tế | Chưa xác định commit sửa lỗi | FastAPI khởi động thành công trên cổng 8001 |
+| BUG-02 | Vấn đề cấu hình triển khai | `f54f007` | Thiết lập tài khoản và đăng nhập thành công trên Clean Clone |
+| BUG-03 | Rủi ro dữ liệu trùng | `7377515`, `f54f007` | Seed lần đầu thêm 3/3/3, lần hai thêm 0/0/0 |
+| BUG-04 | Cải tiến kiến trúc | `25c91bc`, `f54f007` | Bộ kiểm thử Service và CRUD PASS |
+| BUG-05 | Kiểm chứng khả năng triển khai | `f54f007` | Clean Clone và 27/27 bài kiểm thử PASS |
+
+### 4.1. Liên kết commit GitHub
+
+**Commit f54f007 – Hoàn thiện BT2**
+
+https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment/commit/f54f007
+
+**Commit 25c91bc – API phân công và lịch hẹn**
+
+https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment/commit/25c91bc
+
+**Commit 7377515 – Seed dữ liệu ban đầu**
+
+https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment/commit/7377515
+
+### 4.2. Lệnh kiểm chứng
+
+**Kiểm tra Migration:**
+
+```bash
+python3 -m src.backend.migrate
+```
+
+**Kiểm tra Seed:**
+
+```bash
+python3 -m src.backend.seed
+python3 -m src.backend.seed
+```
+
+**Kiểm tra toàn bộ bộ kiểm thử:**
+
+```bash
+python3 -m pytest -q
+```
+
+**Chạy hệ thống trên cổng 8001:**
+
+```bash
+python3 -m uvicorn src.backend.main:app --reload --port 8001
+```
+
+Các lệnh trên được sử dụng trong quá trình kiểm chứng bản Clean Clone. Kết quả đã ghi nhận là 27/27 bài kiểm thử PASS, Seed không tạo thêm bản ghi mẫu ở lần chạy thứ hai và luồng đăng nhập, phân công, đặt lịch hoạt động thành công.
+
+### 4.3. Giới hạn của nhật ký
+
+BUG-01 là sự cố môi trường đã quan sát được. Các mục BUG-02 đến BUG-05 là vấn đề cấu hình, rủi ro hoặc cải tiến được kiểm chứng.
+
+Chưa có đủ bằng chứng để khẳng định cả năm mục đều là lỗi mã nguồn đã được sửa trong Giai đoạn 2. Khi có thêm lỗi thực tế, cần ghi riêng thời điểm phát hiện, bước tái hiện, nguyên nhân, thay đổi mã nguồn, commit sửa và kết quả kiểm thử lại.
