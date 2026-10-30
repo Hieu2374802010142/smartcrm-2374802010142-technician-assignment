@@ -1,95 +1,170 @@
 
+import argparse
 import sqlite3
 from pathlib import Path
 
-# Thu muc goc cua du an
-ROOT_DIR = Path(__file__).resolve().parents[2]
+from src.backend.migrate import (
+    DEFAULT_DB_PATH,
+    migrate_database,
+)
 
-DB_PATH = ROOT_DIR / "smartcrm-sprint1.db"
-SCHEMA_PATH = ROOT_DIR / "docs" / "database" / "schema-l04.sql"
+
+CUSTOMERS = [
+    ("Nguyen Van Nam", "0909000001"),
+    ("Tran Thi Hoa", "0909000002"),
+    ("Le Minh Tuan", "0909000003"),
+]
+
+TECHNICIANS = [
+    ("Nguyen Van An", "0901234567", "Phan cung", 1),
+    ("Tran Minh Binh", "0912345678", "Phan mem", 1),
+    ("Le Quoc Cuong", "0923456789", "Dien thoai", 1),
+]
+
+TICKETS = [
+    ("0909000001", "iPhone 13 - Demo"),
+    ("0909000002", "Samsung Galaxy S22 - Demo"),
+    ("0909000003", "OPPO Reno 8 - Demo"),
+]
 
 
-def seed_database():
-    # Kiem tra file SQL
-    if not SCHEMA_PATH.exists():
-        print("Loi: Khong tim thay file schema-l04.sql")
-        return
+def seed_database(db_path=DEFAULT_DB_PATH):
+    db_path = Path(db_path).resolve()
 
-    # Ket noi database
-    conn = sqlite3.connect(DB_PATH)
+    # Tao schema neu database chua ton tai
+    migrate_database(db_path)
+
+    conn = sqlite3.connect(db_path)
 
     try:
-        # Kiem tra cac bang hien co
-        existing_tables = {
-            row[0]
-            for row in conn.execute(
-                "SELECT name FROM sqlite_master "
-                "WHERE type = 'table'"
-            ).fetchall()
-        }
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("BEGIN")
 
-        required_tables = {
-            "khach_hang",
-            "phieu_bao_hanh",
-            "ky_thuat_vien",
-            "phan_cong_ky_thuat_vien",
-            "lich_hen",
-        }
+        inserted_customers = 0
+        inserted_technicians = 0
+        inserted_tickets = 0
 
-        # Tao bang khi database hoan toan moi
-        if not existing_tables:
-            schema = SCHEMA_PATH.read_text(encoding="utf-8")
-            conn.executescript(schema)
-            print("Da tao cac bang database.")
-
-        # Neu database da co bang thi khong tao lai
-        elif required_tables.issubset(existing_tables):
-            print("Database da co day du bang, bo qua tao bang.")
-
-        else:
-            missing_tables = required_tables - existing_tables
-            print("Loi: Database thieu bang:", missing_tables)
-            print("Khong thay doi database.")
-            return
-
-        # Du lieu ky thuat vien mau
-        technicians = [
-            ("Nguyen Van An", "0901234567", "Phan cung", 1),
-            ("Tran Minh Binh", "0912345678", "Phan mem", 1),
-            ("Le Quoc Cuong", "0923456789", "Dien thoai", 1),
-        ]
-
-        # Kiem tra du lieu hien co
-        count = conn.execute(
-            "SELECT COUNT(*) FROM ky_thuat_vien"
-        ).fetchone()[0]
-
-        if count == 0:
-            conn.executemany(
+        # 1. Seed khach hang
+        for name, phone in CUSTOMERS:
+            existing = conn.execute(
                 """
-                INSERT INTO ky_thuat_vien
-                (ho_ten, so_dien_thoai, chuyen_mon, dang_hoat_dong)
-                VALUES (?, ?, ?, ?)
+                SELECT ma_khach_hang
+                FROM khach_hang
+                WHERE so_dien_thoai = ?
+                LIMIT 1
                 """,
-                technicians,
-            )
-            conn.commit()
-            print("Da them 3 ky thuat vien mau.")
-        else:
-            print(
-                f"Bang da co {count} ky thuat vien, "
-                "khong them trung."
-            )
+                (phone,)
+            ).fetchone()
 
-        print("Khoi tao database thanh cong!")
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO khach_hang
+                    (ho_ten, so_dien_thoai)
+                    VALUES (?, ?)
+                    """,
+                    (name, phone)
+                )
+                inserted_customers += 1
 
-    except sqlite3.Error as error:
+        # 2. Seed ky thuat vien
+        for name, phone, specialty, active in TECHNICIANS:
+            existing = conn.execute(
+                """
+                SELECT ma_ky_thuat_vien
+                FROM ky_thuat_vien
+                WHERE so_dien_thoai = ?
+                LIMIT 1
+                """,
+                (phone,)
+            ).fetchone()
+
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO ky_thuat_vien
+                    (
+                        ho_ten,
+                        so_dien_thoai,
+                        chuyen_mon,
+                        dang_hoat_dong
+                    )
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (name, phone, specialty, active)
+                )
+                inserted_technicians += 1
+
+        # 3. Seed phieu bao hanh
+        for phone, device in TICKETS:
+            customer = conn.execute(
+                """
+                SELECT ma_khach_hang
+                FROM khach_hang
+                WHERE so_dien_thoai = ?
+                LIMIT 1
+                """,
+                (phone,)
+            ).fetchone()
+
+            if customer is None:
+                raise RuntimeError(
+                    f"Khong tim thay khach hang: {phone}"
+                )
+
+            customer_id = customer[0]
+
+            existing = conn.execute(
+                """
+                SELECT ma_phieu
+                FROM phieu_bao_hanh
+                WHERE ma_khach_hang = ?
+                  AND ten_thiet_bi = ?
+                LIMIT 1
+                """,
+                (customer_id, device)
+            ).fetchone()
+
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO phieu_bao_hanh
+                    (
+                        ma_khach_hang,
+                        ten_thiet_bi,
+                        trang_thai
+                    )
+                    VALUES (?, ?, 'Mới')
+                    """,
+                    (customer_id, device)
+                )
+                inserted_tickets += 1
+
+        conn.commit()
+
+        print("\n=== KET QUA SEED ===")
+        print(f"Khach hang moi: {inserted_customers}")
+        print(f"Ky thuat vien moi: {inserted_technicians}")
+        print(f"Phieu bao hanh moi: {inserted_tickets}")
+        print("Seed thanh cong!")
+
+    except Exception:
         conn.rollback()
-        print(f"Loi SQLite: {error}")
+        raise
 
     finally:
         conn.close()
 
 
 if __name__ == "__main__":
-    seed_database()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--db",
+        default=str(DEFAULT_DB_PATH),
+        help="Duong dan SQLite database"
+    )
+
+    args = parser.parse_args()
+
+    seed_database(args.db)

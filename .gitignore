@@ -28,3 +28,6 @@ Thumbs.db
 # Local backup files
 *-backup.md
 *-backup.sql
+
+# Local frontend backup
+src/frontend/index-backup.html

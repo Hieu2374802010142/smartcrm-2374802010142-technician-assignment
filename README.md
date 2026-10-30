@@ -1,127 +1,96 @@
 # SMARTCRM – MEKONG MOBILE
 
-**Luồng L04:** Phân công kỹ thuật viên và lịch hẹn  
-**Track:** SE – Software Engineering  
-**Sinh viên:** Nguyễn Ngọc Hiếu  
+**Luồng L04:** Phân công kỹ thuật viên và lịch hẹn
+**Track:** Software Engineering (SE)
+**Sinh viên:** Nguyễn Ngọc Hiếu
 **MSSV:** 2374802010142
+**Bài tập:** BT2 – Triển khai phần mềm
 
 ## 1. Giới thiệu dự án
 
-SmartCRM L04 là hệ thống hỗ trợ quản lý quy trình phân công kỹ thuật viên và lịch hẹn trong trung tâm bảo hành thiết bị.
+SmartCRM L04 là ứng dụng web hỗ trợ trung tâm bảo hành Mekong Mobile quản lý phiếu bảo hành, kỹ thuật viên và lịch hẹn.
 
-Hệ thống được thiết kế để hỗ trợ Quản lý trung tâm xem phiếu bảo hành chưa phân công, lựa chọn kỹ thuật viên phù hợp, thực hiện phân công và quản lý lịch hẹn giao – nhận thiết bị.
+Các chức năng đã triển khai:
 
-Trong **Sprint 1 – Buổi 8**, dự án tập trung xây dựng cơ sở dữ liệu, tổ chức kiến trúc Backend và triển khai CRUD cho thực thể Kỹ thuật viên.
+- Đăng nhập bằng tài khoản quản lý.
+- Xem danh sách phiếu bảo hành chưa phân công.
+- Thêm, xem, cập nhật và xóa phiếu bảo hành.
+- Quản lý thông tin kỹ thuật viên.
+- Phân công kỹ thuật viên cho phiếu bảo hành.
+- Đặt lịch hẹn nhận hoặc trả thiết bị.
+- Kiểm tra trùng lịch hẹn của kỹ thuật viên.
+- Kiểm tra quyền truy cập đối với các API quản lý.
 
-## 2. Môi trường và hướng dẫn chạy
+## 2. Công nghệ sử dụng
 
-### 2.1. Công nghệ sử dụng
+| Thành phần | Công nghệ |
+|---|---|
+| Ngôn ngữ | Python 3.12 |
+| Backend | FastAPI |
+| Frontend | HTML, CSS, JavaScript |
+| Database | SQLite |
+| API Documentation | Swagger UI |
+| Automated Testing | pytest |
+| Quản lý mã nguồn | Git, GitHub |
 
-- Ngôn ngữ: Python 3.12
-- Backend: FastAPI
-- Database: SQLite
-- API Documentation: Swagger UI
-- Công cụ phát triển: Visual Studio Code
-- Quản lý phiên bản: Git và GitHub
+Hệ thống sử dụng kiến trúc phân lớp:
 
-### 2.2. Cài đặt thư viện
+**Frontend → Routes → Services → Repositories → SQLite**
 
-Tại thư mục gốc dự án, chạy:
+- **Routes:** Tiếp nhận yêu cầu HTTP, kiểm tra quyền và xử lý HTTP response.
+- **Services:** Kiểm tra dữ liệu, xử lý nghiệp vụ và phát sinh lỗi nghiệp vụ.
+- **Repositories:** Truy vấn và cập nhật dữ liệu SQLite.
+- **Frontend:** Giao diện tương tác với backend thông qua REST API.
+
+## 3. Yêu cầu môi trường
+
+Máy tính cần cài đặt:
+
+- Python 3.12
+- Git
+- Trình duyệt web
+- Visual Studio Code (khuyến nghị)
+
+## 4. Hướng dẫn cài đặt từ GitHub
+
+### Bước 1. Clone dự án
+
+Mở Terminal và chạy:
+
+```bash
+git clone https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment.git
+
+cd smartcrm-2374802010142-technician-assignment
+```
+
+### Bước 2. Tạo môi trường Python
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Cài đặt thư viện:
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-### 2.3. Khởi tạo cơ sở dữ liệu
+### Bước 3. Khởi tạo database
 
-File SQL DDL:
+Chạy Migration:
 
-`docs/database/schema-l04.sql`
+```bash
+python3 -m src.backend.migrate
+```
 
-Chạy lệnh sau để tạo database và thêm dữ liệu mẫu:
+Chạy Seed:
 
 ```bash
 python3 -m src.backend.seed
 ```
 
-Chương trình sẽ:
-
-- Tạo database `smartcrm-sprint1.db` nếu chưa tồn tại.
-- Khởi tạo 5 bảng theo ERD L04.
-- Thêm 3 kỹ thuật viên mẫu nếu bảng kỹ thuật viên chưa có dữ liệu.
-- Không thêm dữ liệu mẫu trùng khi chạy lại.
-- Không ghi đè dữ liệu kỹ thuật viên hiện có.
-
-Database SQLite được lưu tại thư mục gốc dự án và không đưa lên GitHub.
-
-### 2.4. Khởi động Backend
-
-```bash
-python3 -m uvicorn src.backend.main:app --reload
-```
-
-Địa chỉ Backend:
-
-http://127.0.0.1:8000
-
-Swagger UI:
-
-http://127.0.0.1:8000/docs
-
-Truy cập Swagger UI để kiểm thử các API.
-
-## 3. Phạm vi chức năng L04
-
-Các Use Case thuộc phạm vi thiết kế:
-
-- UC01 – Xem phiếu chưa phân công
-- UC02 – Xem thông tin kỹ thuật viên
-- UC03 – Phân công kỹ thuật viên
-- UC04 – Đặt lịch hẹn
-- UC05 – Kiểm tra trùng lịch
-- UC06 – Xem công việc được phân công
-- UC07 – Hủy phân công kỹ thuật viên
-- UC08 – Cập nhật lịch hẹn
-
-Các Use Case trên thuộc phạm vi thiết kế tổng thể. Trong Sprint 1, hệ thống mới triển khai CRUD kỹ thuật viên để làm nền tảng cho các chức năng nghiệp vụ tiếp theo.
-
-## 4. Thiết kế và kiến trúc hệ thống
-
-### 4.1. Tài liệu thiết kế
-
-- SRS: `srs.md`
-- Use Case: `docs/use-cases/`
-- Sơ đồ kiến trúc: `docs/architecture/`
-- ERD và SQL DDL: `docs/database/`
-- Wireframe: `docs/wireframes/`
-- Nhật ký thay đổi thiết kế: `docs/thay-doi-thiet-ke.md`
-
-### 4.2. Kiến trúc Backend
-
-Backend được tổ chức theo ba tầng:
-
-**Routes → Service → Repository → SQLite**
-
-- **Routes:** Tiếp nhận HTTP request và trả về response.
-- **Service:** Xử lý logic nghiệp vụ và các trường hợp lỗi.
-- **Repository:** Thực hiện truy vấn SQLite.
-- **SQLite:** Lưu trữ dữ liệu của hệ thống.
-
-Các file chính:
-
-```text
-src/backend/
-├── main.py
-├── seed.py
-├── routes/
-│   └── technician_routes.py
-├── services/
-│   └── technician_service.py
-└── repositories/
-    └── technician_repository.py
-```
-
-### 4.3. Cơ sở dữ liệu
+Chương trình sử dụng database `smartcrm-sprint1.db` tại thư mục gốc dự án.
 
 Database gồm 5 bảng:
 
@@ -131,70 +100,213 @@ Database gồm 5 bảng:
 4. `phan_cong_ky_thuat_vien`
 5. `lich_hen`
 
-Các bảng được xây dựng dựa trên ERD của luồng L04.
+Seed tạo dữ liệu mẫu:
 
-## 5. API Sprint 1
+- 3 khách hàng.
+- 3 kỹ thuật viên.
+- 3 phiếu bảo hành ở trạng thái `Mới`.
+
+Migration và Seed có thể chạy lại mà không tạo trùng các dữ liệu mẫu trên database chưa bị chỉnh sửa.
+
+### Bước 4. Thiết lập tài khoản quản lý
+
+Chạy:
+
+```bash
+python3 -m src.backend.setup_admin
+```
+
+Nhập tên đăng nhập, mật khẩu và xác nhận mật khẩu theo hướng dẫn.
+
+Chương trình tạo file `.env` chứa tên đăng nhập, salt và mã băm mật khẩu.
+
+Nạp cấu hình:
+
+```bash
+set -a
+source .env
+set +a
+```
+
+**Lưu ý:** Không đưa `.env`, mật khẩu hoặc database cá nhân lên GitHub.
+
+### Bước 5. Khởi động ứng dụng
+
+```bash
+python3 -m uvicorn src.backend.main:app --reload
+```
+
+Các đường dẫn:
+
+- Giao diện ứng dụng: http://127.0.0.1:8000/app
+- Swagger UI: http://127.0.0.1:8000/docs
+- Kiểm tra backend: http://127.0.0.1:8000/
+- Kiểm tra SQLite: http://127.0.0.1:8000/db-test
+
+Để dừng backend, nhấn `Control + C` trong Terminal.
+
+## 5. Hướng dẫn sử dụng
+
+### 5.1. Đăng nhập
+
+Truy cập:
+
+http://127.0.0.1:8000/app
+
+Đăng nhập bằng tài khoản quản lý đã tạo ở Bước 4.
+
+Sau khi đăng nhập thành công, người quản lý có thể sử dụng các chức năng nghiệp vụ của hệ thống.
+
+### 5.2. Xem phiếu chưa phân công
+
+Ứng dụng tải danh sách các phiếu bảo hành đang ở trạng thái `Mới` và chưa được phân công kỹ thuật viên.
+
+### 5.3. Phân công kỹ thuật viên
+
+1. Chọn phiếu bảo hành chưa phân công.
+2. Chọn kỹ thuật viên đang hoạt động.
+3. Nhấn nút phân công.
+4. Hệ thống kiểm tra điều kiện nghiệp vụ và lưu kết quả.
+
+### 5.4. Đặt lịch hẹn
+
+1. Chọn phân công đang hoạt động.
+2. Chọn ngày hẹn.
+3. Nhập giờ bắt đầu và kết thúc.
+4. Chọn loại lịch hẹn.
+5. Lưu lịch hẹn.
+
+Hệ thống kiểm tra thời gian hợp lệ và phát hiện lịch trùng trước khi lưu.
+
+## 6. Các API chính
 
 | Phương thức | Endpoint | Chức năng |
 |---|---|---|
-| GET | `/` | Kiểm tra trang chủ |
-| GET | `/db-test` | Kiểm tra kết nối SQLite |
-| GET | `/api/technicians` | Xem danh sách kỹ thuật viên |
+| POST | `/api/auth/login` | Đăng nhập |
+| GET | `/api/technicians` | Xem kỹ thuật viên |
 | POST | `/api/technicians` | Thêm kỹ thuật viên |
 | PUT | `/api/technicians/{technician_id}` | Cập nhật kỹ thuật viên |
-| DELETE | `/api/technicians/{technician_id}` | Ngừng hoạt động kỹ thuật viên (xóa mềm) |
+| DELETE | `/api/technicians/{technician_id}` | Ngừng hoạt động kỹ thuật viên |
+| GET | `/api/tickets` | Xem danh sách phiếu |
+| POST | `/api/tickets` | Tạo phiếu |
+| GET | `/api/tickets/{ticket_id}` | Xem chi tiết phiếu |
+| PUT | `/api/tickets/{ticket_id}` | Cập nhật phiếu |
+| DELETE | `/api/tickets/{ticket_id}` | Xóa phiếu |
+| GET | `/api/tickets/unassigned` | Xem phiếu chưa phân công |
+| POST | `/api/tickets/{ticket_id}/assign` | Phân công kỹ thuật viên |
+| GET | `/api/tickets/assignments` | Xem danh sách phân công |
+| POST | `/api/tickets/appointments` | Tạo lịch hẹn |
 
-### Kiểm thử API
+Các API thay đổi dữ liệu được bảo vệ bằng cơ chế xác thực và phân quyền quản lý theo cấu hình hiện tại.
 
-Đã kiểm thử bằng Swagger UI:
+## 7. Kiểm thử tự động
 
-- GET danh sách kỹ thuật viên: HTTP 200.
-- POST thêm kỹ thuật viên: HTTP 201.
-- PUT cập nhật kỹ thuật viên: HTTP 200.
-- DELETE ngừng hoạt động kỹ thuật viên: HTTP 200.
+Chạy toàn bộ bài kiểm thử:
 
-Ảnh minh chứng được lưu tại:
+```bash
+python3 -m pytest -v
+```
 
-`docs/api-tests/`
+Các nhóm kiểm thử:
 
-Gồm các file:
+| Nhóm | Số bài kiểm thử |
+|---|---:|
+| Authentication | 4 |
+| Technician Service | 8 |
+| Ticket CRUD | 9 |
+| Ticket Service | 6 |
+| **Tổng cộng** | **27** |
 
-- `get-technicians.png`
-- `post-technician.png`
-- `put-technician.png`
-- `delete-technician.png`
+Kết quả kiểm thử gần nhất trong quá trình phát triển:
 
-## 6. Tiến độ Sprint 1 – Buổi 8
+**27 passed in 0.24s**
 
-### 6.1. Đã hoàn thành
+Các bài kiểm thử sử dụng mock và dữ liệu thử nghiệm để xác minh nghiệp vụ mà không cần thao tác trực tiếp trên database sản xuất.
 
-- Rà soát phản hồi Bài tập 1.
-- Tạo nhật ký thay đổi thiết kế.
-- Xây dựng SQL DDL gồm 5 bảng.
-- Tổ chức Backend theo kiến trúc Routes → Service → Repository.
-- Xây dựng CRUD kỹ thuật viên bằng FastAPI và SQLite.
-- Kiểm thử các API GET, POST, PUT, DELETE.
-- Lưu 4 ảnh minh chứng kiểm thử Swagger.
-- Xây dựng chương trình tạo dữ liệu mẫu `seed.py`.
-- Kiểm tra tạo thành công 5 bảng trên database mới.
-- Kiểm tra thêm thành công 3 kỹ thuật viên mẫu.
-- Sử dụng Conventional Commits.
-- Commit và push mã nguồn lên GitHub nhánh `main`.
+## 8. Migration và Seed
 
-### 6.2. Công việc cần tiếp tục
+Migration sử dụng SQL DDL trong:
 
-- Bổ sung kiểm thử tự động và các trường hợp ngoại lệ.
-- Xây dựng chức năng phân công kỹ thuật viên.
-- Xây dựng chức năng đặt lịch hẹn.
-- Triển khai kiểm tra trùng lịch trước khi lưu.
-- Tiếp tục đối chiếu mã nguồn với tài liệu thiết kế.
+`docs/database/schema-l04.sql`
 
-## 7. GitHub
+File thực thi:
+
+`src/backend/migrate.py`
+
+File tạo dữ liệu mẫu:
+
+`src/backend/seed.py`
+
+Có thể thử nghiệm trên database riêng:
+
+```bash
+python3 -m src.backend.migrate --db /tmp/smartcrm-demo.db
+python3 -m src.backend.seed --db /tmp/smartcrm-demo.db
+```
+
+Chạy Seed lần thứ hai để kiểm tra tính lặp lại.
+
+## 9. Tổ chức mã nguồn
+
+```text
+smartcrm-2374802010142-technician-assignment/
+├── docs/
+│   ├── architecture/
+│   ├── database/
+│   ├── use-cases/
+│   └── wireframes/
+├── src/
+│   ├── backend/
+│   │   ├── auth/
+│   │   ├── repositories/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── main.py
+│   │   ├── migrate.py
+│   │   ├── seed.py
+│   │   └── setup_admin.py
+│   └── frontend/
+│       └── index.html
+├── tests/
+│   ├── test_auth.py
+│   ├── test_technician_service.py
+│   ├── test_ticket_crud.py
+│   └── test_ticket_service.py
+├── .env.example
+├── .gitignore
+├── requirements.txt
+├── README.md
+└── srs.md
+```
+
+## 10. Tài liệu thiết kế
+
+- Đặc tả yêu cầu: `srs.md`
+- Use Case: `docs/use-cases/`
+- Kiến trúc hệ thống: `docs/architecture/`
+- ERD và SQL DDL: `docs/database/`
+- Wireframe: `docs/wireframes/`
+- Nhật ký thay đổi thiết kế: `docs/thay-doi-thiet-ke.md`
+
+## 11. Phạm vi và giới hạn
+
+Dự án tập trung triển khai luồng L04 – Phân công kỹ thuật viên và lịch hẹn.
+
+Các chức năng như quản lý kho, thanh toán, bảo hành toàn hệ thống và quản trị nhiều chi nhánh không thuộc phạm vi triển khai BT2.
+
+Phiên đăng nhập hiện được lưu trong bộ nhớ backend, có thời hạn 60 phút và sẽ mất khi khởi động lại server.
+
+Ứng dụng sử dụng SQLite để phục vụ học tập, kiểm thử và demo.
+
+## 12. GitHub
 
 Repository:
 
 https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment
 
-Nhánh phát triển: `main`.
+Nhánh chính: `main`
 
-Dự án sử dụng GitHub để quản lý mã nguồn, tài liệu thiết kế và minh chứng kiểm thử trong quá trình thực hiện Sprint 1.
+Mã nguồn, tài liệu thiết kế, kiểm thử tự động và hướng dẫn chạy được quản lý bằng Git và GitHub.
+
+**Sinh viên thực hiện:** Nguyễn Ngọc Hiếu
+**MSSV:** 2374802010142

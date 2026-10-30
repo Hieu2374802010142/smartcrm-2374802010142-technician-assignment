@@ -204,3 +204,148 @@ def get_active_assignments():
 
     finally:
         conn.close()
+
+# ==========================================
+# CRUD PHIEU BAO HANH - BT2 TRACK SE
+# ==========================================
+
+def get_all_tickets():
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("""
+            SELECT p.ma_phieu, p.ma_khach_hang,
+                   p.ten_thiet_bi, p.trang_thai,
+                   p.ngay_tao,
+                   k.ho_ten AS ten_khach_hang
+            FROM phieu_bao_hanh p
+            JOIN khach_hang k
+              ON p.ma_khach_hang = k.ma_khach_hang
+            ORDER BY p.ma_phieu DESC
+        """).fetchall()
+
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+
+def get_ticket_by_id(ticket_id):
+    conn = get_db_connection()
+    try:
+        row = conn.execute("""
+            SELECT ma_phieu, ma_khach_hang,
+                   ten_thiet_bi, trang_thai, ngay_tao
+            FROM phieu_bao_hanh
+            WHERE ma_phieu = ?
+        """, (ticket_id,)).fetchone()
+
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def customer_exists(customer_id):
+    conn = get_db_connection()
+    try:
+        row = conn.execute("""
+            SELECT 1 FROM khach_hang
+            WHERE ma_khach_hang = ?
+        """, (customer_id,)).fetchone()
+
+        return row is not None
+    finally:
+        conn.close()
+
+
+def insert_ticket(customer_id, device_name):
+    conn = get_db_connection()
+    try:
+        cursor = conn.execute("""
+            INSERT INTO phieu_bao_hanh
+                (ma_khach_hang, ten_thiet_bi)
+            VALUES (?, ?)
+        """, (customer_id, device_name))
+
+        conn.commit()
+        return cursor.lastrowid
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+def update_ticket(ticket_id, customer_id, device_name):
+    conn = get_db_connection()
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+
+        ticket = conn.execute("""
+            SELECT trang_thai FROM phieu_bao_hanh
+            WHERE ma_phieu = ?
+        """, (ticket_id,)).fetchone()
+
+        if ticket is None:
+            conn.rollback()
+            return "NOT_FOUND"
+
+        assignment = conn.execute("""
+            SELECT 1 FROM phan_cong_ky_thuat_vien
+            WHERE ma_phieu = ?
+            LIMIT 1
+        """, (ticket_id,)).fetchone()
+
+        if ticket["trang_thai"] != "Mới" or assignment:
+            conn.rollback()
+            return "NOT_EDITABLE"
+
+        conn.execute("""
+            UPDATE phieu_bao_hanh
+            SET ma_khach_hang = ?, ten_thiet_bi = ?
+            WHERE ma_phieu = ?
+        """, (customer_id, device_name, ticket_id))
+
+        conn.commit()
+        return "SUCCESS"
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+def delete_ticket(ticket_id):
+    conn = get_db_connection()
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+
+        ticket = conn.execute("""
+            SELECT trang_thai FROM phieu_bao_hanh
+            WHERE ma_phieu = ?
+        """, (ticket_id,)).fetchone()
+
+        if ticket is None:
+            conn.rollback()
+            return "NOT_FOUND"
+
+        assignment = conn.execute("""
+            SELECT 1 FROM phan_cong_ky_thuat_vien
+            WHERE ma_phieu = ?
+            LIMIT 1
+        """, (ticket_id,)).fetchone()
+
+        if ticket["trang_thai"] != "Mới" or assignment:
+            conn.rollback()
+            return "NOT_DELETABLE"
+
+        conn.execute("""
+            DELETE FROM phieu_bao_hanh
+            WHERE ma_phieu = ?
+        """, (ticket_id,))
+
+        conn.commit()
+        return "SUCCESS"
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()

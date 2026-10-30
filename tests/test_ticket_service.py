@@ -1,11 +1,15 @@
+
 import pytest
-from fastapi import HTTPException
 from unittest.mock import patch
 
 from src.backend.services import ticket_service
+from src.backend.services.ticket_service import TicketError
 
 
-# TC01 - Kiem tra danh sach phieu chua phan cong
+# ==========================================
+# TC01 - XEM PHIEU CHUA PHAN CONG
+# ==========================================
+
 def test_get_unassigned_tickets():
     sample_tickets = [
         {
@@ -20,7 +24,6 @@ def test_get_unassigned_tickets():
         }
     ]
 
-    # Gia lap du lieu tu Repository
     with patch.object(
         ticket_service.repo,
         "get_unassigned_tickets",
@@ -33,9 +36,12 @@ def test_get_unassigned_tickets():
     assert result["tickets"][0]["ma_phieu"] == 2
     assert result["tickets"][1]["ma_phieu"] == 3
 
-# TC02 - Phan cong ky thuat vien thanh cong
+
+# ==========================================
+# TC02 - PHAN CONG KY THUAT VIEN THANH CONG
+# ==========================================
+
 def test_assign_technician_success():
-    # Gia lap ket qua phan cong thanh cong tu Repository
     mock_result = {
         "status": "SUCCESS",
         "ma_phan_cong": 10
@@ -56,7 +62,11 @@ def test_assign_technician_success():
     assert result["ma_ky_thuat_vien"] == 1
     assert result["message"] == "Phan cong ky thuat vien thanh cong"
 
-# TC03 - Khong cho phan cong phieu da duoc phan cong
+
+# ==========================================
+# TC03 - TU CHOI PHIEU KHONG CON TRANG THAI MOI
+# ==========================================
+
 def test_assign_technician_ticket_not_new():
     mock_result = {
         "status": "TICKET_NOT_NEW"
@@ -67,15 +77,20 @@ def test_assign_technician_ticket_not_new():
         "assign_technician",
         return_value=mock_result
     ):
-        with pytest.raises(HTTPException) as error:
+        with pytest.raises(TicketError) as error:
             ticket_service.assign_technician(
                 ticket_id=1,
                 technician_id=2
             )
 
-    assert error.value.status_code == 409
+    assert error.value.code == "CONFLICT"
+    assert "Moi" in error.value.message
 
-# TC04 - Dat lich hen thanh cong
+
+# ==========================================
+# TC04 - DAT LICH HEN THANH CONG
+# ==========================================
+
 def test_create_appointment_success():
     mock_result = {
         "status": "SUCCESS",
@@ -87,7 +102,6 @@ def test_create_appointment_success():
         "create_appointment",
         return_value=mock_result
     ) as mock_create:
-
         result = ticket_service.create_appointment(
             assignment_id=2,
             ngay_hen="2026-10-28",
@@ -108,7 +122,11 @@ def test_create_appointment_success():
         "Nhan thiet bi"
     )
 
-# TC05 - Tu choi lich hen bi trung
+
+# ==========================================
+# TC05 - TU CHOI LICH HEN BI TRUNG
+# ==========================================
+
 def test_create_appointment_overlap():
     mock_result = {
         "status": "APPOINTMENT_OVERLAP"
@@ -119,7 +137,7 @@ def test_create_appointment_overlap():
         "create_appointment",
         return_value=mock_result
     ):
-        with pytest.raises(HTTPException) as error:
+        with pytest.raises(TicketError) as error:
             ticket_service.create_appointment(
                 assignment_id=2,
                 ngay_hen="2026-10-27",
@@ -128,17 +146,20 @@ def test_create_appointment_overlap():
                 loai_lich_hen="Nhan thiet bi"
             )
 
-    assert error.value.status_code == 409
-    assert "trung" in error.value.detail.lower()
+    assert error.value.code == "CONFLICT"
+    assert "trung" in error.value.message.lower()
 
-# TC06 - Tu choi lich hen co thoi gian khong hop le
+
+# ==========================================
+# TC06 - TU CHOI THOI GIAN KHONG HOP LE
+# ==========================================
+
 def test_create_appointment_invalid_time():
     with patch.object(
         ticket_service.repo,
         "create_appointment"
     ) as mock_create:
-
-        with pytest.raises(HTTPException) as error:
+        with pytest.raises(TicketError) as error:
             ticket_service.create_appointment(
                 assignment_id=2,
                 ngay_hen="2026-10-28",
@@ -147,7 +168,7 @@ def test_create_appointment_invalid_time():
                 loai_lich_hen="Nhan thiet bi"
             )
 
-    assert error.value.status_code == 400
+    assert error.value.code == "INVALID_DATA"
 
     # Du lieu sai khong duoc gui xuong Repository
     mock_create.assert_not_called()
