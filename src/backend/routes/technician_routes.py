@@ -43,9 +43,12 @@ def handle_technician_error(error: TechnicianError):
     ) from error
 
 
-# Lay danh sach ky thuat vien
+# Lay danh sach ky thuat vien - chi quan ly
+# BUG-03: Yeu cau xac thuc va quyen quan ly
 @router.get("")
-def get_technicians():
+def get_technicians(
+    user: dict = Depends(check_manager)
+):
     try:
         return technician_service.get_technicians()
     except TechnicianError as error:

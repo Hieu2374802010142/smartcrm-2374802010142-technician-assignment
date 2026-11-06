@@ -69,3 +69,9 @@ def test_unassigned_tickets_requires_authentication():
     response = client.get("/api/tickets/unassigned")
 
     assert response.status_code == 401
+
+# BT3-BUG-03 - Khong cho xem danh sach ky thuat vien khi chua dang nhap
+def test_technicians_requires_authentication():
+    response = client.get("/api/technicians")
+
+    assert response.status_code == 401
