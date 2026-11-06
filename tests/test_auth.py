@@ -57,3 +57,9 @@ def test_assign_with_manager_role():
 
     assert response.status_code == 200
     mock_assign.assert_called_once_with(0, 1)
+
+# BUG-01 - Khong duoc xem danh sach phan cong khi chua dang nhap
+def test_assignments_requires_authentication():
+    response = client.get("/api/tickets/assignments")
+
+    assert response.status_code == 401

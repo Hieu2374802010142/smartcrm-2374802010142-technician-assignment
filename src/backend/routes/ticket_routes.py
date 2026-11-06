@@ -121,10 +121,13 @@ def create_appointment(
 
 # ==========================================
 # XEM DANH SACH PHAN CONG
+# BUG-01: BO SUNG KIEM TRA XAC THUC VA QUYEN
 # ==========================================
 
 @router.get("/assignments")
-def get_active_assignments():
+def get_active_assignments(
+    manager: dict = Depends(check_manager)
+):
     try:
         return ticket_service.get_active_assignments()
     except TicketError as error:
