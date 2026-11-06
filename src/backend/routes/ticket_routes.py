@@ -68,10 +68,13 @@ class TicketData(BaseModel):
 
 # ==========================================
 # UC01 - XEM PHIEU CHUA PHAN CONG
+# BUG-02 - BO SUNG KIEM TRA XAC THUC VA QUYEN
 # ==========================================
 
 @router.get("/unassigned")
-def get_unassigned_tickets():
+def get_unassigned_tickets(
+    manager: dict = Depends(check_manager)
+):
     try:
         return ticket_service.get_unassigned_tickets()
     except TicketError as error:
@@ -121,7 +124,7 @@ def create_appointment(
 
 # ==========================================
 # XEM DANH SACH PHAN CONG
-# BUG-01: BO SUNG KIEM TRA XAC THUC VA QUYEN
+# BUG-01 - BO SUNG KIEM TRA XAC THUC VA QUYEN
 # ==========================================
 
 @router.get("/assignments")
