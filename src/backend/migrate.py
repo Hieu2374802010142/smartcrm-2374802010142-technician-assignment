@@ -1,11 +1,20 @@
 
 import argparse
+import os
 import sqlite3
 from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-DEFAULT_DB_PATH = ROOT_DIR / "smartcrm-sprint1.db"
+
+# Database mac dinh khi chay tren MacBook
+LOCAL_DB_PATH = ROOT_DIR / "smartcrm-sprint1.db"
+
+# Docker su dung SMARTCRM_DB_PATH=/data/smartcrm.db
+# Neu khong co bien moi truong, dung database cu
+DEFAULT_DB_PATH = Path(
+    os.getenv("SMARTCRM_DB_PATH", str(LOCAL_DB_PATH))
+)
 
 SCHEMA_PATH = (
     ROOT_DIR / "docs" / "database" / "schema-l04.sql"
@@ -61,7 +70,6 @@ def migrate_database(db_path=DEFAULT_DB_PATH):
 
             # Tao schema khi database moi hoan toan
             conn.executescript(schema)
-
             print("Da tao schema database.")
 
         elif REQUIRED_TABLES.issubset(existing_tables):
@@ -121,5 +129,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
     migrate_database(args.db)

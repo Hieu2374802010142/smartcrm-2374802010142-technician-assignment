@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environment
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+
+# SQLite databases and backups
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode
+.idea
+
+# Temporary files
+*.log
+*.tmp
+
+# Test artifacts
+.coverage
+htmlcov

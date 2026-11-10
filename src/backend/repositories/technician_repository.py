@@ -1,9 +1,19 @@
 
+import os
 import sqlite3
 from pathlib import Path
 
-# Duong dan database Sprint 1
-DB_PATH = Path(__file__).resolve().parents[3] / "smartcrm-sprint1.db"
+# Duong dan database mac dinh khi chay tren MacBook
+DEFAULT_DB_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "smartcrm-sprint1.db"
+)
+
+# Docker su dung SMARTCRM_DB_PATH=/data/smartcrm.db
+# Neu khong co bien moi truong, van dung database cu
+DB_PATH = Path(
+    os.getenv("SMARTCRM_DB_PATH", str(DEFAULT_DB_PATH))
+)
 
 
 def get_db_connection():

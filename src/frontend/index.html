@@ -1072,14 +1072,21 @@ function getAuthHeaders() {
     };
 }
 
-/* TONG QUAN */
+/* TONG QUAN - DA SUA TOKEN */
+
 async function loadDashboard() {
     try {
         const [ticketResponse, technicianResponse, assignmentResponse] =
             await Promise.all([
-                fetch("/api/tickets/unassigned"),
-                fetch("/api/technicians"),
-                fetch("/api/tickets/assignments")
+                fetch("/api/tickets/unassigned", {
+                    headers: getAuthHeaders()
+                }),
+                fetch("/api/technicians", {
+                    headers: getAuthHeaders()
+                }),
+                fetch("/api/tickets/assignments", {
+                    headers: getAuthHeaders()
+                })
             ]);
 
         const tickets = await checkResponse(ticketResponse);
@@ -1102,7 +1109,8 @@ async function loadDashboard() {
     }
 }
 
-/* DANH SACH PHIEU */
+/* DANH SACH PHIEU - DA SUA TOKEN */
+
 async function loadTickets() {
     const table = document.getElementById("ticketTable");
     table.innerHTML = "";
@@ -1110,7 +1118,10 @@ async function loadTickets() {
     setMessage("message", "Đang tải dữ liệu...");
 
     try {
-        const response = await fetch("/api/tickets/unassigned");
+        const response = await fetch("/api/tickets/unassigned", {
+            headers: getAuthHeaders()
+        });
+
         const data = await checkResponse(response);
 
         if (data.tickets.length === 0) {
@@ -1154,7 +1165,8 @@ async function loadTickets() {
     }
 }
 
-/* TAI LUA CHON PHAN CONG */
+/* TAI LUA CHON PHAN CONG - DA SUA TOKEN */
+
 async function loadAssignmentOptions() {
     const ticketSelect =
         document.getElementById("ticketSelect");
@@ -1171,8 +1183,12 @@ async function loadAssignmentOptions() {
     try {
         const [ticketResponse, technicianResponse] =
             await Promise.all([
-                fetch("/api/tickets/unassigned"),
-                fetch("/api/technicians")
+                fetch("/api/tickets/unassigned", {
+                    headers: getAuthHeaders()
+                }),
+                fetch("/api/technicians", {
+                    headers: getAuthHeaders()
+                })
             ]);
 
         const ticketData = await checkResponse(ticketResponse);
@@ -1236,6 +1252,7 @@ async function loadAssignmentOptions() {
 }
 
 /* THUC HIEN PHAN CONG */
+
 async function assignTechnician() {
     const ticketId =
         document.getElementById("ticketSelect").value;
@@ -1306,7 +1323,8 @@ async function assignTechnician() {
     }
 }
 
-/* DANH SACH PHAN CONG */
+/* DANH SACH PHAN CONG - DA SUA TOKEN */
+
 async function loadAssignments() {
     const select =
         document.getElementById("assignmentSelect");
@@ -1316,7 +1334,10 @@ async function loadAssignments() {
 
     try {
         const response = await fetch(
-            "/api/tickets/assignments"
+            "/api/tickets/assignments",
+            {
+                headers: getAuthHeaders()
+            }
         );
 
         const data = await checkResponse(response);
@@ -1359,6 +1380,7 @@ async function loadAssignments() {
 }
 
 /* DAT LICH HEN */
+
 async function createAppointment() {
     const assignmentId =
         document.getElementById("assignmentSelect").value;
@@ -1454,6 +1476,7 @@ async function createAppointment() {
 }
 
 /* KHOI TAO */
+
 document.getElementById("loginForm").addEventListener(
     "submit",
     loginManager
