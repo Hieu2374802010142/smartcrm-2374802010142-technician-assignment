@@ -30,6 +30,7 @@
 - **Kiểm thử hồi quy:** test_assignments_requires_authentication – PASS.
 - **Trạng thái:** Fixed.
 - **Commit:** https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment/commit/c8c966d
+- **Ảnh minh chứng:** [Bug01.png](screenshots/Bug01.png)
 
 ### BUG-02 – API phiếu chưa phân công thiếu xác thực
 
@@ -44,6 +45,7 @@
 - **Kiểm thử hồi quy:** test_unassigned_tickets_requires_authentication – PASS.
 - **Trạng thái:** Fixed.
 - **Commit:** https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment/commit/b50ce78
+- **Ảnh minh chứng:** [Bug02.png](screenshots/Bug02.png)
 
 ### BUG-03 – API danh sách kỹ thuật viên thiếu xác thực
 
@@ -58,6 +60,7 @@
 - **Kiểm thử hồi quy:** test_technicians_requires_authentication – PASS.
 - **Trạng thái:** Fixed.
 - **Commit:** https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment/commit/a4651d7
+- **Ảnh minh chứng:** [Bug03.png](screenshots/Bug03.png)
 
 ---
 
