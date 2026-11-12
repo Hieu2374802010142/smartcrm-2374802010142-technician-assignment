@@ -1,178 +1,313 @@
 # SMARTCRM L04 – SECURITY CHECKLIST
 
-**Project:** SmartCRM – Technician Assignment and Appointment Management  
-**Student:** Nguyễn Ngọc Hiếu  
-**Student ID:** 2374802010142  
-**Date:** November 10, 2026  
-**Version:** 1.0 – Security Review
+**Project:** SmartCRM – Technician Assignment and Appointment Management
+**Student:** Nguyễn Ngọc Hiếu
+**Student ID:** 2374802010142
+**Review Date:** November 12, 2026
+**Version:** 1.1 – BT3 Final Security Review
+**Environment:** macOS, Python 3.12, FastAPI, SQLite, Docker Compose
 
 ## 1. Purpose
 
-This document records the security controls implemented in SmartCRM L04 and identifies additional verification tasks before final deployment.
+This document evaluates the security controls implemented in SmartCRM L04 as part of Assignment 3 (BT3).
 
-The security review focuses on authentication, authorization, password protection, environment configuration, Docker deployment, input validation, and security testing.
+The review focuses on seven security criteria: secret management, input validation and SQL injection prevention, data ownership, password hashing, error handling, sensitive logging, and dependency security.
+
+The results are based on source code inspection, automated tests, Docker deployment verification, Git configuration checks, and dependency auditing.
+
+**Status definitions:**
+
+- **DONE:** The requirement has been verified within the documented scope.
+- **NOT DONE:** The requirement is incomplete or has not been sufficiently verified.
+- **N/A:** The requirement does not apply to the current system design.
 
 ## 2. Security Checklist
 
-### SEC-01: User Authentication
+### SEC-01: Secrets and Git Repository Protection
 
-**Objective:** Prevent unauthenticated users from accessing protected management functions.
+**Requirement:** Prevent passwords, authentication secrets, and sensitive environment configuration from being committed to Git.
 
-**Implementation:**
-- SmartCRM provides an administrator login API.
-- Successful login returns an authentication token.
-- The frontend sends the token in the `Authorization: Bearer` header when accessing protected APIs.
+**Status: DONE**
 
-**Verification evidence:**
-- Manager login was successfully tested after the Docker deployment.
-- The frontend was updated to include authentication headers in protected GET requests.
+**Implementation and evidence:**
 
-**Status:** PASS – Basic login and authenticated dashboard access verified.
+- Administrator credentials are configured through environment variables.
+- The local `.env` file is excluded from Git tracking.
+- The `.dockerignore` file excludes `.env` and `.env.*`.
+- The `.env.example` file is retained as a configuration template.
+- The inspected Git history did not reveal a committed local `.env` file.
+- Docker Compose loads environment configuration separately from application source code.
 
-### SEC-02: API Authorization
+**Evidence files:**
 
-**Objective:** Restrict sensitive API endpoints to authorized users.
+- `.gitignore`
+- `.dockerignore`
+- `.env.example`
+- `compose.yaml`
 
-**Implementation:**
-- Protected management endpoints require manager authentication.
-- API access checks are implemented on the backend rather than relying only on the frontend.
-- Previously identified access-control issues were addressed in the BT3 bug-fixing phase.
+**Limitations:** This review does not constitute an exhaustive secret scan of every historical file or third-party dependency.
 
-**Verification evidence:**
-- BUG-01: Protected the assignments API.
-- BUG-02: Protected the unassigned tickets API.
-- BUG-03: Protected the technicians list API.
-- Regression screenshots are stored in `docs/screenshots/Bug01.png`, `Bug02.png`, and `Bug03.png`.
+### SEC-02: Input Validation and SQL Injection Prevention
 
-**Status:** PASS – Previously identified authorization defects were fixed and regression evidence was recorded.
+**Requirement:** Validate user input and prevent SQL injection vulnerabilities.
 
-### SEC-03: Password and Credential Protection
+**Status: DONE**
 
-**Objective:** Reduce the risk of exposing administrator credentials.
+**Implementation and evidence:**
 
-**Implementation:**
-- The administrator configuration uses a password hash and salt.
-- The application reads authentication settings from environment variables.
-- Plain-text administrator passwords must not be committed to the repository.
+- FastAPI and Pydantic validate API request data.
+- Invalid request types are rejected with HTTP 422.
+- Ticket and technician identifiers are validated.
+- Appointment end times must be later than start times.
+- Appointment scheduling checks for overlapping active appointments.
+- Both repository modules use parameterized SQL queries with `?` placeholders for dynamic values.
+- No direct concatenation of user-provided input into SQL statements was identified in the two reviewed repository files.
+- SQLite transactions use `BEGIN IMMEDIATE` in important assignment and scheduling operations.
 
-**Verification tasks:**
-- Confirm that the configured password hash is generated by the supported administrator setup procedure.
-- Confirm that no real password, password hash, or salt is included in tracked source files.
-- Review password-hashing implementation and password-strength requirements before production deployment.
+**Evidence files:**
 
-**Status:** PARTIAL – Environment-based credential configuration is present; a complete credential-security review remains pending.
+- `src/backend/repositories/technician_repository.py`
+- `src/backend/repositories/ticket_repository.py`
+- `src/backend/routes/ticket_routes.py`
+- `src/backend/routes/technician_routes.py`
+- `src/backend/services/ticket_service.py`
+- `docs/test-plan-bt3.md`
+- `docs/test-report.md`
 
-### SEC-04: Environment Variables and Sensitive Files
+**Limitations:** The DONE status applies to the reviewed implementation. Exhaustive fuzz testing and concurrent-request testing have not been completed.
 
-**Objective:** Protect application secrets and local configuration files.
+### SEC-03: Owner-Level Data Access Control
 
-**Implementation:**
-- Docker Compose loads the `.env` file.
-- The Docker build uses `.dockerignore` to reduce unnecessary build context.
-- Environment-specific settings are kept separate from application source code.
+**Requirement:** Ensure users can access only data they own or are authorized to manage.
 
-**Verification evidence:**
-- The Docker deployment was built and started using local environment configuration.
-- The Docker-related Git commit did not include `.env`.
+**Status: N/A**
 
-**Additional verification:**
-- Confirm that `.env` is excluded by `.gitignore`.
-- Review `.dockerignore` to confirm that sensitive files are excluded.
-- Check the complete Git history for previously committed secrets.
+**Reason:**
 
-**Status:** PARTIAL – Current deployment commit excludes `.env`; full repository and history checks remain pending.
+The current SmartCRM L04 implementation uses a manager-oriented administration model rather than separate customer accounts with individual data ownership.
 
-### SEC-05: Docker and Network Security
+The reviewed management APIs require the `manager` role.
 
-**Objective:** Limit unnecessary exposure of the running application.
+Therefore, per-customer ownership checks are not applicable to the current implemented account model.
 
-**Implementation:**
-- SmartCRM runs in a Docker container.
-- Docker Compose binds the application to `127.0.0.1:8000` for local access.
-- The SQLite database is stored in a persistent Docker volume.
-- A container health check is configured.
+**Related security control:**
 
-**Verification evidence:**
-- The Docker image built successfully.
-- The application container started successfully.
-- The application was accessible through `http://127.0.0.1:8000/app`.
+Backend authorization is enforced through `get_current_user()` and `require_manager()`.
 
-**Additional verification:**
-- Review container user privileges.
-- Scan dependencies and the Docker image for known vulnerabilities.
-- Configure HTTPS and appropriate network controls before public deployment.
+**Evidence files:**
 
-**Status:** PASS for local deployment; production hardening remains pending.
+- `src/backend/auth/security.py`
+- `src/backend/routes/ticket_routes.py`
+- `src/backend/routes/technician_routes.py`
 
-### SEC-06: Input Validation and Appointment Scheduling
+**Future consideration:** If customer or technician accounts are introduced, owner-level or role-specific data access rules must be implemented and tested.
 
-**Objective:** Prevent invalid scheduling data and conflicting appointments.
+### SEC-04: Password Hashing and Authentication
 
-**Implementation:**
-- The backend validates appointment time ranges.
-- An appointment's end time must be later than its start time.
-- Scheduling logic checks for overlapping active appointments assigned to the same technician.
-- Backend validation protects business rules independently of frontend checks.
+**Requirement:** Protect stored passwords and authenticate management users securely.
 
-**Verification evidence:**
-- Appointment validation and overlap prevention are included in the SmartCRM implementation and test coverage developed in earlier phases.
+**Status: DONE**
 
-**Additional verification:**
-- Re-run scheduling tests in the final release environment.
-- Verify malformed input, boundary conditions, and concurrent assignment attempts.
+**Implementation and evidence:**
 
-**Status:** PARTIAL – Core validation is implemented; additional boundary and concurrency verification is recommended.
+- Administrator passwords are processed using PBKDF2-HMAC-SHA256.
+- Password hashing uses 600,000 iterations and a salt.
+- Authentication compares credential values using `hmac.compare_digest()`.
+- The password hash and salt are loaded from environment variables.
+- The setup script uses `getpass` for password input.
+- Successful login returns a bearer token with the `manager` role.
+- Tokens expire after 60 minutes.
+- Invalid login credentials return HTTP 401.
+- Protected management endpoints reject missing or invalid authentication tokens.
 
-### SEC-07: Security Testing and Regression Evidence
+**Evidence files:**
 
-**Objective:** Confirm that security fixes remain effective after deployment changes.
+- `src/backend/routes/auth_routes.py`
+- `src/backend/auth/security.py`
+- `src/backend/setup_admin.py`
+- `docs/bug-log-bt3.md`
 
-**Implementation:**
-- SmartCRM includes automated tests using pytest.
-- Authentication and authorization issues were documented during BT3.
-- Regression screenshots were retained for reporting.
+**Limitations:**
 
-**Verification evidence:**
-- Latest local automated test result: `32 passed in 0.27s`.
-- Docker deployment and authenticated dashboard access were manually verified.
-- Security defect documentation: `docs/bug-log-bt3.md`.
+- Authentication tokens are stored in application memory.
+- Sessions are lost when the application restarts.
+- No login rate-limiting mechanism was identified during the review.
+- Additional authentication hardening would be necessary for a public production deployment.
 
-**Additional verification:**
-- Run an API security test against the final Docker deployment.
-- Confirm unauthorized requests are rejected.
-- Record the final test date and test environment.
+### SEC-05: Error Handling and Stack Trace Protection
 
-**Status:** PASS for the automated test suite; final Docker security regression testing remains pending.
+**Requirement:** Avoid exposing internal stack traces, database details, or sensitive implementation information through API errors.
 
-## 3. Security Review Summary
+**Status: NOT DONE**
 
-| ID | Security Area | Status |
+**Verified implementation:**
+
+- No explicit `debug=True` configuration was found in the reviewed backend source.
+- Authentication errors use fixed response messages.
+- Ticket and technician services convert handled SQLite errors into general application error messages.
+- The `/health` endpoint returns a generic HTTP 503 response when its database check fails.
+- No direct `str(exc)` or traceback response was identified in the reviewed source.
+
+**Remaining verification:**
+
+- Test unexpected runtime exceptions against the deployed API.
+- Verify that all unhandled errors return safe responses.
+- Review the `/db-test` endpoint's behavior when the database is unavailable.
+
+**Evidence files:**
+
+- `src/backend/main.py`
+- `src/backend/routes/auth_routes.py`
+- `src/backend/routes/ticket_routes.py`
+- `src/backend/routes/technician_routes.py`
+
+**Reason for status:** Existing controls are present, but complete error-disclosure verification has not been performed.
+
+### SEC-06: Sensitive Information in Application Logs
+
+**Requirement:** Prevent passwords, authentication tokens, and other sensitive information from being written to logs.
+
+**Status: NOT DONE**
+
+**Verified implementation:**
+
+- No direct logging of administrator passwords or authentication tokens was identified in the reviewed Python source.
+- The seed script prints operation summaries and record counts.
+- The administrator setup script does not print the entered password.
+- Previous Docker log inspection did not reveal exposed authentication credentials.
+
+**Remaining verification:**
+
+- Review access logging under authenticated requests.
+- Verify log behavior during unexpected exceptions.
+- Confirm that request bodies and authorization headers are not exposed by production logging configuration.
+- Review log retention and access restrictions before public deployment.
+
+**Evidence files:**
+
+- `src/backend/seed.py`
+- `src/backend/setup_admin.py`
+- `src/backend/migrate.py`
+- `src/backend/routes/auth_routes.py`
+
+**Reason for status:** Source inspection found no direct sensitive logging, but comprehensive runtime logging verification remains incomplete.
+
+### SEC-07: Dependency Versioning and Vulnerability Audit
+
+**Requirement:** Pin application dependencies and check them for known security vulnerabilities.
+
+**Status: DONE**
+
+**Implementation and evidence:**
+
+- The `requirements.txt` file contains 15 pinned dependency entries.
+- The dependency audit was executed using `pip-audit`.
+- The audit returned: `No known vulnerabilities found`.
+- The audit result was recorded as security evidence.
+
+**Evidence files:**
+
+- `requirements.txt`
+- `docs/screenshots/Security_Dependency_Audit.png`
+
+**Limitations:**
+
+- Dependency audits reflect known vulnerabilities at the time of execution.
+- The Docker base image has not been separately verified through a completed image vulnerability scan.
+- Dependencies should be audited again before future releases.
+
+## 3. Additional Authentication and Authorization Verification
+
+Three major authorization defects were identified and fixed during BT3.
+
+| Bug ID | Affected API | Fix Commit | Result |
+|---|---|---|---|
+| BUG-01 | `GET /api/tickets/assignments` | `c8c966d` | Fixed |
+| BUG-02 | `GET /api/tickets/unassigned` | `b50ce78` | Fixed |
+| BUG-03 | `GET /api/technicians` | `a4651d7` | Fixed |
+
+Unauthenticated requests to these endpoints were subsequently verified to return HTTP 401.
+
+The management routes use backend authorization checks rather than relying only on frontend restrictions.
+
+**Evidence:**
+
+- `docs/bug-log-bt3.md`
+- `docs/screenshots/Bug01.png`
+- `docs/screenshots/Bug02.png`
+- `docs/screenshots/Bug03.png`
+
+## 4. Automated Testing and Docker Deployment
+
+The following verification results were recorded during BT3:
+
+| Verification | Result |
+|---|---|
+| Automated pytest suite | 32 tests passed |
+| Python syntax check | Passed |
+| Docker Compose build | Successful |
+| Docker container health | Healthy |
+| Fresh Clone deployment | Successful |
+| `GET /health` | HTTP 200 |
+| `GET /app` | HTTP 200 |
+| Administrator login | HTTP 200 with valid credentials |
+| Invalid login | HTTP 401 |
+| Invalid request data | HTTP 422 |
+| Unauthenticated protected APIs | HTTP 401 |
+| Dependency vulnerability audit | No known vulnerabilities found |
+
+The standard Docker deployment uses localhost port 8000.
+
+The separate Fresh Clone verification uses localhost port 8001 through a Docker Compose override file.
+
+The Fresh Clone was used to verify that the application could be started independently from the release source.
+
+**Evidence documents:**
+
+- `docs/test-report.md`
+- `docs/test-report-docker.md`
+- `docs/bug-log-bt3.md`
+- `docs/screenshots/`
+
+## 5. Security Review Summary
+
+| ID | Security Criterion | Status |
 |---|---|---|
-| SEC-01 | User authentication | PASS |
-| SEC-02 | API authorization | PASS |
-| SEC-03 | Password and credential protection | PARTIAL |
-| SEC-04 | Environment variables and sensitive files | PARTIAL |
-| SEC-05 | Docker and network security | PASS (local only) |
-| SEC-06 | Input validation and scheduling | PARTIAL |
-| SEC-07 | Security testing and regression | PASS (with pending checks) |
+| SEC-01 | Secrets and Git repository protection | DONE |
+| SEC-02 | Input validation and SQL injection prevention | DONE |
+| SEC-03 | Owner-level data access control | N/A |
+| SEC-04 | Password hashing and authentication | DONE |
+| SEC-05 | Error handling and stack trace protection | NOT DONE |
+| SEC-06 | Sensitive information in application logs | NOT DONE |
+| SEC-07 | Dependency versioning and vulnerability audit | DONE |
 
-**Summary:** Four checklist areas have passed their documented scope of verification, while three require additional review. A PASS for local deployment does not mean the application is production-ready.
+**Summary:**
 
-## 4. Known Risks and Recommendations
+- 4 criteria: DONE
+- 2 criteria: NOT DONE
+- 1 criterion: N/A
 
-1. Review password-hashing security and credential-management practices.
-2. Verify that no sensitive files or secrets exist in Git history.
-3. Perform dependency and Docker image vulnerability scanning.
-4. Verify unauthorized access handling against the final Docker container.
-5. Test concurrent technician assignments and appointment conflicts.
-6. Configure HTTPS, network restrictions, and production-specific security settings before internet-facing deployment.
+The NOT DONE classifications identify areas where complete verification or additional hardening remains necessary. They do not mean that no protective measures have been implemented.
 
-## 5. Conclusion
+## 6. Known Risks and Recommendations
 
-SmartCRM L04 has implemented essential security controls for manager authentication, protected API access, environment-based configuration, and appointment validation.
+1. Implement or verify safe handling of unexpected application exceptions.
+2. Complete runtime testing of sensitive information exposure in application logs.
+3. Introduce login rate limiting for public-facing deployments.
+4. Consider persistent session management if multiple application instances are required.
+5. Perform a Docker image vulnerability scan.
+6. Conduct concurrent-request tests for technician assignment and appointment scheduling.
+7. Configure HTTPS, production network restrictions, and appropriate container privileges before internet-facing deployment.
+8. Repeat dependency and security checks whenever the application is updated.
 
-The previous BT3 authorization issues were addressed, and the latest local automated test run completed successfully with 32 passing tests.
+## 7. Conclusion
 
-Additional verification is required before the application can be considered ready for production use.
+SmartCRM L04 implements important security controls, including administrator authentication, manager-level API authorization, password hashing, parameterized SQL queries, input validation, and environment-based secret configuration.
 
-This checklist serves as security evidence for the Docker deployment and final course-project review.
+During BT3, three major authorization defects were fixed, 32 automated tests passed, and the Docker deployment and Fresh Clone were successfully verified.
+
+The dependency audit found no known vulnerabilities at the time of testing.
+
+The application has demonstrated its suitability for the verified local course-project environment. However, additional security testing and hardening are required before it can be considered production-ready.
+
+This document records the security evidence and remaining limitations for the BT3 submission.
