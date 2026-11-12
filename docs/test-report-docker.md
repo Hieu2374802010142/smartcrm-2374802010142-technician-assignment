@@ -243,7 +243,9 @@ The following checks have not yet been fully documented for this deployment:
 - Test complete technician assignment and appointment creation workflows.
 - Test invalid or expired authentication tokens.
 - Verify role-specific access restrictions.
-- Run dependency and Docker image vulnerability scans.
+- Run a Docker image vulnerability scan (not yet verified).
+
+Dependency audit completed on November 12, 2026 using `python3 -m pip_audit -r requirements.txt`. Result: `No known vulnerabilities found`. Evidence: `docs/screenshots/Security_Dependency_Audit.png`.
 - Test simultaneous appointment requests for scheduling conflicts.
 
 These checks should be completed before production deployment.
