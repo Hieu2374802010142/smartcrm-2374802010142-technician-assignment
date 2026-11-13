@@ -76,7 +76,13 @@ SMARTCRM_ADMIN_PASSWORD_HASH=<generated-password-hash>
 
 The example values are placeholders and must not be used as real credentials.
 
-Generate the password hash and salt using the project's administrator setup procedure.
+Generate unique administrator credentials by running:
+
+    python3 -m src.backend.setup_admin
+
+Enter the username and password when prompted. The tool generates a random salt and password hash and writes them to the local `.env` file. If `.env` already exists, confirm overwriting only when you intend to replace its credentials.
+
+Do not use placeholder values from `.env.example` as real credentials.
 
 The authentication implementation uses PBKDF2-HMAC-SHA256 with 600,000 iterations.
 
