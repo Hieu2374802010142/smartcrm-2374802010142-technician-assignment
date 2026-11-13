@@ -4,13 +4,13 @@
 **Track:** Software Engineering (SE)
 **Sinh viên:** Nguyễn Ngọc Hiếu
 **MSSV:** 2374802010142
-**Bài tập:** BT2 – Triển khai phần mềm
+**Bài tập:** BT3 – Kiểm thử, đóng gói và triển khai phần mềm
 
 ## 1. Giới thiệu dự án
 
 SmartCRM L04 là ứng dụng web hỗ trợ trung tâm bảo hành Mekong Mobile quản lý phiếu bảo hành, kỹ thuật viên và lịch hẹn.
 
-Các chức năng đã triển khai:
+Các chức năng chính:
 
 - Đăng nhập bằng tài khoản quản lý.
 - Xem danh sách phiếu bảo hành chưa phân công.
@@ -19,7 +19,7 @@ Các chức năng đã triển khai:
 - Phân công kỹ thuật viên cho phiếu bảo hành.
 - Đặt lịch hẹn nhận hoặc trả thiết bị.
 - Kiểm tra trùng lịch hẹn của kỹ thuật viên.
-- Kiểm tra quyền truy cập đối với các API quản lý.
+- Kiểm tra xác thực và phân quyền truy cập API.
 
 ## 2. Công nghệ sử dụng
 
@@ -29,98 +29,125 @@ Các chức năng đã triển khai:
 | Backend | FastAPI |
 | Frontend | HTML, CSS, JavaScript |
 | Database | SQLite |
+| Container | Docker, Docker Compose |
 | API Documentation | Swagger UI |
 | Automated Testing | pytest |
 | Quản lý mã nguồn | Git, GitHub |
 
-Hệ thống sử dụng kiến trúc phân lớp:
+Kiến trúc hệ thống:
 
 **Frontend → Routes → Services → Repositories → SQLite**
 
-- **Routes:** Tiếp nhận yêu cầu HTTP, kiểm tra quyền và xử lý HTTP response.
-- **Services:** Kiểm tra dữ liệu, xử lý nghiệp vụ và phát sinh lỗi nghiệp vụ.
-- **Repositories:** Truy vấn và cập nhật dữ liệu SQLite.
-- **Frontend:** Giao diện tương tác với backend thông qua REST API.
+- **Routes:** Tiếp nhận HTTP request, kiểm tra quyền và trả HTTP response.
+- **Services:** Xử lý nghiệp vụ và kiểm tra dữ liệu.
+- **Repositories:** Truy vấn và cập nhật SQLite.
+- **Frontend:** Tương tác với backend thông qua REST API.
 
 ## 3. Yêu cầu môi trường
 
-Máy tính cần cài đặt:
+### Triển khai bằng Docker (khuyến nghị)
 
-- Python 3.12
-- Git
-- Trình duyệt web
-- Visual Studio Code (khuyến nghị)
+- Docker Desktop có hỗ trợ Docker Compose.
+- Git.
+- Trình duyệt web.
 
-## 4. Hướng dẫn cài đặt từ GitHub
+### Chạy trực tiếp bằng Python
 
-### Bước 1. Clone dự án
+- Python 3.12.
+- Git.
+- Trình duyệt web.
+- Visual Studio Code (khuyến nghị).
 
-Mở Terminal và chạy:
+## 4. Docker Quickstart – Hướng dẫn chạy BT3
+
+### Bước 1. Clone repository
 
 ```bash
 git clone https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment.git
-
 cd smartcrm-2374802010142-technician-assignment
 ```
 
-### Bước 2. Tạo môi trường Python
+Để kiểm tra đúng phiên bản được đánh dấu cho bài nộp:
+
+```bash
+git checkout v1.0
+```
+
+**Lưu ý:** Tag `v1.0` hiện có trên GitHub nhưng chưa được xác nhận chứa toàn bộ thay đổi BT3 mới nhất. Cần hoàn tất kiểm tra phiên bản trước khi nộp.
+
+### Bước 2. Chuẩn bị cấu hình môi trường
+
+```bash
+cp .env.example .env
+```
+
+File `.env.example` cung cấp cấu hình tài khoản demo phục vụ kiểm thử học phần.
+
+Không sử dụng tài khoản demo này trong môi trường production. Không commit file `.env` lên GitHub.
+
+### Bước 3. Build và khởi động ứng dụng
+
+```bash
+docker compose up -d --build
+```
+
+Docker sẽ thực hiện:
+
+1. Build image sử dụng Python 3.12.
+2. Cài đặt các thư viện trong `requirements.txt`.
+3. Sao chép mã nguồn backend và database schema.
+4. Chạy module seed để chuẩn bị database.
+5. Khởi động FastAPI trên cổng `8000`.
+
+### Bước 4. Kiểm tra trạng thái
+
+```bash
+docker compose ps
+```
+
+Container hoạt động bình thường khi có trạng thái `healthy`.
+
+Các địa chỉ truy cập:
+
+- **Ứng dụng:** http://127.0.0.1:8000/app
+- **Swagger UI:** http://127.0.0.1:8000/docs
+- **Health API:** http://127.0.0.1:8000/health
+- **Database check:** http://127.0.0.1:8000/db-test
+
+### Bước 5. Dừng ứng dụng
+
+```bash
+docker compose down
+```
+
+Dữ liệu SQLite được lưu trong Docker named volume `smartcrm_data`, giúp duy trì dữ liệu giữa các lần khởi động thông thường.
+
+**Lưu ý:** Quy trình chạy từ bản clone sạch của tag `v1.0` cần được xác minh lại trước khi nộp chính thức.
+
+## 5. Hướng dẫn chạy trực tiếp bằng Python
+
+### Bước 1. Tạo môi trường
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-Cài đặt thư viện:
-
-```bash
 python3 -m pip install -r requirements.txt
 ```
 
-### Bước 3. Khởi tạo database
-
-Chạy Migration:
+### Bước 2. Khởi tạo database
 
 ```bash
 python3 -m src.backend.migrate
-```
-
-Chạy Seed:
-
-```bash
 python3 -m src.backend.seed
 ```
 
-Chương trình sử dụng database `smartcrm-sprint1.db` tại thư mục gốc dự án.
-
-Database gồm 5 bảng:
-
-1. `khach_hang`
-2. `phieu_bao_hanh`
-3. `ky_thuat_vien`
-4. `phan_cong_ky_thuat_vien`
-5. `lich_hen`
-
-Seed tạo dữ liệu mẫu:
-
-- 3 khách hàng.
-- 3 kỹ thuật viên.
-- 3 phiếu bảo hành ở trạng thái `Mới`.
-
-Migration và Seed có thể chạy lại mà không tạo trùng các dữ liệu mẫu trên database chưa bị chỉnh sửa.
-
-### Bước 4. Thiết lập tài khoản quản lý
-
-Chạy:
+### Bước 3. Thiết lập tài khoản quản lý
 
 ```bash
 python3 -m src.backend.setup_admin
 ```
 
-Nhập tên đăng nhập, mật khẩu và xác nhận mật khẩu theo hướng dẫn.
-
-Chương trình tạo file `.env` chứa tên đăng nhập, salt và mã băm mật khẩu.
-
-Nạp cấu hình:
+Sau khi thiết lập `.env`, nạp biến môi trường:
 
 ```bash
 set -a
@@ -128,57 +155,44 @@ source .env
 set +a
 ```
 
-**Lưu ý:** Không đưa `.env`, mật khẩu hoặc database cá nhân lên GitHub.
-
-### Bước 5. Khởi động ứng dụng
+### Bước 4. Khởi động FastAPI
 
 ```bash
-python3 -m uvicorn src.backend.main:app --reload
+python3 -m uvicorn src.backend.main:app --reload --port 8000
 ```
 
-Các đường dẫn:
+Truy cập http://127.0.0.1:8000/app.
 
-- Giao diện ứng dụng: http://127.0.0.1:8000/app
-- Swagger UI: http://127.0.0.1:8000/docs
-- Kiểm tra backend: http://127.0.0.1:8000/
-- Kiểm tra SQLite: http://127.0.0.1:8000/db-test
+**Lưu ý:** Không chạy Uvicorn và Docker Compose đồng thời trên cùng cổng `8000`.
 
-Để dừng backend, nhấn `Control + C` trong Terminal.
+## 6. Hướng dẫn sử dụng
 
-## 5. Hướng dẫn sử dụng
+### 6.1. Đăng nhập
 
-### 5.1. Đăng nhập
+Mở giao diện `/app` và đăng nhập bằng tài khoản quản lý đã cấu hình.
 
-Truy cập:
+### 6.2. Xem phiếu chưa phân công
 
-http://127.0.0.1:8000/app
+Hệ thống hiển thị các phiếu bảo hành đang ở trạng thái `Mới` và chưa có phân công hoạt động.
 
-Đăng nhập bằng tài khoản quản lý đã tạo ở Bước 4.
-
-Sau khi đăng nhập thành công, người quản lý có thể sử dụng các chức năng nghiệp vụ của hệ thống.
-
-### 5.2. Xem phiếu chưa phân công
-
-Ứng dụng tải danh sách các phiếu bảo hành đang ở trạng thái `Mới` và chưa được phân công kỹ thuật viên.
-
-### 5.3. Phân công kỹ thuật viên
+### 6.3. Phân công kỹ thuật viên
 
 1. Chọn phiếu bảo hành chưa phân công.
 2. Chọn kỹ thuật viên đang hoạt động.
 3. Nhấn nút phân công.
 4. Hệ thống kiểm tra điều kiện nghiệp vụ và lưu kết quả.
 
-### 5.4. Đặt lịch hẹn
+### 6.4. Đặt lịch hẹn
 
 1. Chọn phân công đang hoạt động.
 2. Chọn ngày hẹn.
-3. Nhập giờ bắt đầu và kết thúc.
+3. Nhập giờ bắt đầu và giờ kết thúc.
 4. Chọn loại lịch hẹn.
 5. Lưu lịch hẹn.
 
-Hệ thống kiểm tra thời gian hợp lệ và phát hiện lịch trùng trước khi lưu.
+Hệ thống kiểm tra thời gian hợp lệ và từ chối lịch hẹn trùng với lịch đã có của cùng kỹ thuật viên.
 
-## 6. Các API chính
+## 7. Các API chính
 
 | Phương thức | Endpoint | Chức năng |
 |---|---|---|
@@ -196,65 +210,126 @@ Hệ thống kiểm tra thời gian hợp lệ và phát hiện lịch trùng tr
 | POST | `/api/tickets/{ticket_id}/assign` | Phân công kỹ thuật viên |
 | GET | `/api/tickets/assignments` | Xem danh sách phân công |
 | POST | `/api/tickets/appointments` | Tạo lịch hẹn |
+| GET | `/health` | Kiểm tra trạng thái backend và database |
 
-Các API thay đổi dữ liệu được bảo vệ bằng cơ chế xác thực và phân quyền quản lý theo cấu hình hiện tại.
+Các API quản lý được bảo vệ bằng cơ chế xác thực và kiểm tra quyền theo cấu hình hệ thống.
 
-## 7. Kiểm thử tự động
+Tài liệu API chi tiết: `docs/api-documentation-bt3.md`.
 
-Chạy toàn bộ bài kiểm thử:
+## 8. Kiểm thử Bài tập 3
+
+Chạy toàn bộ bài kiểm thử tự động:
 
 ```bash
-python3 -m pytest -v
+python3 -m pytest -q
 ```
 
-Các nhóm kiểm thử:
+**Kết quả kiểm thử gần nhất trên máy phát triển:**
 
-| Nhóm | Số bài kiểm thử |
-|---|---:|
-| Authentication | 4 |
-| Technician Service | 8 |
-| Ticket CRUD | 9 |
-| Ticket Service | 6 |
-| **Tổng cộng** | **27** |
+- Tổng số bài kiểm thử: **32**
+- PASS: **32**
+- FAIL: **0**
+- Thời gian thực thi: **0.43 giây**
+- Tỷ lệ PASS: **100%**
 
-Kết quả kiểm thử gần nhất trong quá trình phát triển:
+Bộ kiểm thử bao gồm các chức năng xác thực, quản lý kỹ thuật viên, phiếu bảo hành và xử lý nghiệp vụ.
 
-**27 passed in 0.24s**
+Báo cáo BT3 cũng ghi nhận 12 test case được lựa chọn để trình bày minh chứng theo năm nhóm:
 
-Các bài kiểm thử sử dụng mock và dữ liệu thử nghiệm để xác minh nghiệp vụ mà không cần thao tác trực tiếp trên database sản xuất.
+- Happy Path
+- Boundary
+- Invalid Data
+- Security
+- Reproducibility
 
-## 8. Migration và Seed
+Tài liệu:
 
-Migration sử dụng SQL DDL trong:
+- Test Plan: `docs/test-plan-bt3.md`
+- Test Report: `docs/test-report.md`
+- Docker Test Report: `docs/test-report-docker.md`
+- Test Evidence: `docs/screenshots/`
 
-`docs/database/schema-l04.sql`
+## 9. Bug Log và các bản sửa lỗi
 
-File thực thi:
+Trong quá trình kiểm thử BT3, ba lỗi phân quyền đã được ghi nhận và sửa:
 
-`src/backend/migrate.py`
+| Mã lỗi | Nội dung | Commit sửa |
+|---|---|---|
+| BUG-01 | API danh sách phân công chưa kiểm tra xác thực | `c8c966d` |
+| BUG-02 | API phiếu chưa phân công chưa kiểm tra xác thực | `b50ce78` |
+| BUG-03 | API danh sách kỹ thuật viên chưa kiểm tra xác thực | `a4651d7` |
 
-File tạo dữ liệu mẫu:
+Chi tiết các bước tái hiện, mức độ nghiêm trọng, cách sửa và minh chứng:
 
-`src/backend/seed.py`
+`docs/bug-log-bt3.md`
 
-Có thể thử nghiệm trên database riêng:
+## 10. Triển khai và kiểm tra bảo mật
+
+Dự án sử dụng Docker Compose để đóng gói backend FastAPI cùng database SQLite.
+
+Các thành phần triển khai:
+
+- Dockerfile sử dụng `python:3.12-slim`.
+- Docker Compose ánh xạ cổng local `127.0.0.1:8000`.
+- Database được lưu trong named volume.
+- Healthcheck kiểm tra kết nối đến endpoint `/db-test`.
+- Cấu hình quản lý được nạp từ file `.env`.
+- Có file `.env.example` để hỗ trợ tạo môi trường demo.
+
+Các nội dung kiểm tra bảo mật bao gồm xác thực, phân quyền, bảo vệ dữ liệu cấu hình và kiểm tra thư viện phụ thuộc.
+
+Kết quả kiểm tra phụ thuộc và ảnh minh chứng được ghi nhận trong tài liệu BT3. Chưa xác nhận hoàn tất kiểm tra lỗ hổng toàn bộ Docker image.
+
+Tài liệu:
+
+- Deployment Guide: `docs/deployment-guide.md`
+- Security Checklist: `docs/checklist-bao-mat.md`
+- Security Evidence: `docs/screenshots/`
+
+## 11. Migration và Seed
+
+Database SQLite gồm năm bảng chính:
+
+1. `khach_hang`
+2. `phieu_bao_hanh`
+3. `ky_thuat_vien`
+4. `phan_cong_ky_thuat_vien`
+5. `lich_hen`
+
+Schema: `docs/database/schema-l04.sql`
+
+Các module:
+
+- Migration: `src/backend/migrate.py`
+- Seed: `src/backend/seed.py`
+
+Có thể chạy trên database thử nghiệm riêng:
 
 ```bash
 python3 -m src.backend.migrate --db /tmp/smartcrm-demo.db
 python3 -m src.backend.seed --db /tmp/smartcrm-demo.db
 ```
 
-Chạy Seed lần thứ hai để kiểm tra tính lặp lại.
+Seed được thiết kế để hỗ trợ kiểm tra khả năng chạy lặp lại trên dữ liệu mẫu.
 
-## 9. Tổ chức mã nguồn
+## 12. Tổ chức mã nguồn
 
 ```text
 smartcrm-2374802010142-technician-assignment/
 ├── docs/
 │   ├── architecture/
 │   ├── database/
+│   ├── screenshots/
 │   ├── use-cases/
-│   └── wireframes/
+│   ├── wireframes/
+│   ├── test-plan-bt3.md
+│   ├── test-report.md
+│   ├── test-report-docker.md
+│   ├── bug-log-bt3.md
+│   ├── deployment-guide.md
+│   ├── checklist-bao-mat.md
+│   ├── api-documentation-bt3.md
+│   └── ai-disclosure.md
 ├── src/
 │   ├── backend/
 │   │   ├── auth/
@@ -268,45 +343,49 @@ smartcrm-2374802010142-technician-assignment/
 │   └── frontend/
 │       └── index.html
 ├── tests/
-│   ├── test_auth.py
-│   ├── test_technician_service.py
-│   ├── test_ticket_crud.py
-│   └── test_ticket_service.py
 ├── .env.example
 ├── .gitignore
+├── Dockerfile
+├── compose.yaml
 ├── requirements.txt
 ├── README.md
 └── srs.md
 ```
 
-## 10. Tài liệu thiết kế
+## 13. Tài liệu thiết kế và minh chứng
 
 - Đặc tả yêu cầu: `srs.md`
 - Use Case: `docs/use-cases/`
-- Kiến trúc hệ thống: `docs/architecture/`
+- Kiến trúc: `docs/architecture/`
 - ERD và SQL DDL: `docs/database/`
 - Wireframe: `docs/wireframes/`
 - Nhật ký thay đổi thiết kế: `docs/thay-doi-thiet-ke.md`
+- Ảnh minh chứng BT3: `docs/screenshots/`
+- Khai báo sử dụng AI: `docs/ai-disclosure.md`
 
-## 11. Phạm vi và giới hạn
+## 14. Phạm vi và giới hạn
 
-Dự án tập trung triển khai luồng L04 – Phân công kỹ thuật viên và lịch hẹn.
+Dự án tập trung vào luồng L04 – Phân công kỹ thuật viên và lịch hẹn.
 
-Các chức năng như quản lý kho, thanh toán, bảo hành toàn hệ thống và quản trị nhiều chi nhánh không thuộc phạm vi triển khai BT2.
+Các chức năng quản lý kho, thanh toán, bảo hành toàn hệ thống và quản trị nhiều chi nhánh không thuộc phạm vi triển khai.
 
-Phiên đăng nhập hiện được lưu trong bộ nhớ backend, có thời hạn 60 phút và sẽ mất khi khởi động lại server.
+Phiên đăng nhập được lưu trong bộ nhớ backend, có thời hạn 60 phút và có thể mất khi khởi động lại server.
 
-Ứng dụng sử dụng SQLite để phục vụ học tập, kiểm thử và demo.
+SQLite được sử dụng phục vụ mục đích học tập, kiểm thử và demo.
 
-## 12. GitHub
+## 15. GitHub và phiên bản nộp bài
 
-Repository:
+**Repository:**
 
 https://github.com/Hieu2374802010142/smartcrm-2374802010142-technician-assignment
 
-Nhánh chính: `main`
+**Nhánh chính:** `main`
 
-Mã nguồn, tài liệu thiết kế, kiểm thử tự động và hướng dẫn chạy được quản lý bằng Git và GitHub.
+**Tag theo yêu cầu BT3:** `v1.0`
+
+**Trạng thái:** Tag `v1.0` đã tồn tại; cần xác nhận và chốt nội dung phiên bản nộp sau khi hoàn thiện tài liệu.
+
+---
 
 **Sinh viên thực hiện:** Nguyễn Ngọc Hiếu
 **MSSV:** 2374802010142
